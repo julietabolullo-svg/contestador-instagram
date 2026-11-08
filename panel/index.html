@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📩</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contestador de Instagram</title>
+<style>
+  :root{
+    --rosa:#ee5b9d; --rosa-d:#d13d81; --rosa-bg:#fce3ef;
+    --verde:#17966a; --verde-d:#0f6b4c; --verde-bg:#dcf2e8;
+    --crema:#fbf5f0; --crema2:#f4e9e4; --card:#fff;
+    --ink:#1e3a2d; --mut:#7a8a80; --line:#ece5df;
+    --danger:#c0392b; --dangerbg:#fdecea; --gold:#b07a10; --goldbg:#fbf3d9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--crema);color:var(--ink)}
+  header{background:linear-gradient(100deg,var(--rosa),var(--rosa-d) 55%,var(--verde));color:#fff;padding:20px 24px}
+  header h1{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:9px}
+  header p{margin:4px 0 0;opacity:.92;font-size:.83rem}
+  .wrap{max-width:940px;margin:0 auto;padding:22px 18px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(30,58,45,.05)}
+  h2{font-size:1.02rem;margin:0 0 14px}
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .stat .n{font-size:1.6rem;font-weight:800}
+  .stat .l{font-size:.74rem;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-top:2px}
+  .stat.rosa .n{color:var(--rosa-d)} .stat.verde .n{color:var(--verde-d)}
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--crema2);padding:5px;border-radius:12px;width:fit-content}
+  .tab{padding:8px 16px;border-radius:9px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--mut)}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  /* buttons */
+  button{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-size:.9rem;font-weight:600;font-family:inherit}
+  .btn{background:var(--rosa);color:#fff} .btn:hover{background:var(--rosa-d)}
+  .btn-v{background:var(--verde);color:#fff} .btn-v:hover{background:var(--verde-d)}
+  .ghost{background:var(--crema2);color:var(--ink)}
+  .danger{background:var(--dangerbg);color:var(--danger)}
+  .sm{padding:6px 11px;font-size:.8rem}
+  /* rule cards */
+  .rule{border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:12px;background:#fff}
+  .rule.off{opacity:.6}
+  .rule .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .live{display:inline-block;background:var(--verde);color:#fff;font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.05em;vertical-align:middle;margin-right:8px}
+  .live.off{background:#b9bcc0}
+  .kw{font-weight:800;font-size:1.05rem}
+  .trig{color:var(--mut);font-size:.82rem;margin-top:5px}
+  .chip{display:inline-block;background:var(--rosa-bg);color:var(--rosa-d);border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:600;margin:4px 4px 0 0}
+  .chip.v{background:var(--verde-bg);color:var(--verde-d)}
+  .rule .met{text-align:right;font-size:.76rem;color:var(--mut);white-space:nowrap}
+  .rule .met b{color:var(--ink);font-size:1.05rem}
+  .rule .met div{margin-top:3px}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-top:8px;max-height:260px;overflow:auto}
+  .mgrid .m{border:2px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;aspect-ratio:1;background:var(--crema2)}
+  .mgrid .m.sel{border-color:var(--rosa);box-shadow:0 0 0 2px var(--rosa-bg)}
+  .mgrid .m img{width:100%;height:100%;object-fit:cover;display:block}
+  .actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+  .switch{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--mut);cursor:pointer}
+  /* form / modal */
+  label{display:block;font-size:.8rem;color:var(--mut);margin:12px 0 4px;font-weight:700}
+  input[type=text],textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:.94rem;font-family:inherit;background:#fff;color:var(--ink)}
+  textarea{resize:vertical;min-height:56px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:150px}
+  .msgs .msg{display:flex;gap:8px;margin-bottom:8px}.msgs textarea{flex:1}
+  .overlay{position:fixed;inset:0;background:rgba(30,58,45,.45);display:none;align-items:flex-start;justify-content:center;padding:24px;overflow:auto;z-index:50}
+  .overlay.on{display:flex}
+  .modal{background:var(--crema);border-radius:18px;max-width:640px;width:100%;padding:22px}
+  #overlay .modal{max-width:1020px}
+  .ed-grid{display:grid;grid-template-columns:1.05fr .8fr;gap:18px;align-items:start;margin-top:6px}
+  /* Carril del flujo */
+  .ed-pasos .sec{position:relative;margin-left:14px;border-left:3px solid var(--rosa-bg);padding-left:18px;border-radius:0 14px 14px 0}
+  .ed-pasos .sec::before{content:"";position:absolute;left:-9px;top:20px;width:12px;height:12px;border-radius:50%;
+    background:var(--rosa);border:3px solid var(--crema)}
+  .ed-pasos .sec:last-of-type{border-left-color:transparent}
+  .ed-pasos .sec .flecha{position:absolute;left:-7px;bottom:-16px;color:var(--rosa);font-weight:800;font-size:.8rem;background:var(--crema);padding:0 1px}
+  /* Caja de IA */
+  .ai-box{background:linear-gradient(135deg,#fdf0f6,#eef7f2);border:1.5px solid #f3c6dd;border-radius:14px;padding:16px 18px;margin:4px 0 16px}
+  .ai-box .ai-h{font-weight:800;font-size:1rem;color:var(--rosa-d)}
+  .ai-box .ai-sub{font-size:.83rem;color:var(--mut);margin:3px 0 10px}
+  .ai-box textarea{width:100%;min-height:56px}
+  /* Vista previa */
+  .ed-prev{position:sticky;top:10px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .ed-prev .pt{background:var(--ink);color:#fff;font-size:.78rem;font-weight:800;padding:10px 14px}
+  #prevBox{padding:14px;display:flex;flex-direction:column;gap:8px;font-size:.82rem;max-height:68vh;overflow:auto}
+  .pv-sec{font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:6px}
+  .pv-com{background:var(--crema);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+  .pv-rep{margin-left:18px;background:var(--crema2);border-radius:10px;padding:7px 10px;font-size:.78rem}
+  .pv-out{background:var(--rosa-bg);border-radius:12px 12px 12px 4px;padding:8px 11px;max-width:92%;white-space:pre-wrap;align-self:flex-start}
+  .pv-in{background:var(--crema2);border-radius:12px 12px 4px 12px;padding:7px 11px;align-self:flex-end;max-width:85%}
+  .pv-btn{display:inline-block;background:#fff;border:1.5px solid var(--rosa);color:var(--rosa-d);font-weight:800;
+    border-radius:999px;padding:6px 14px;font-size:.78rem}
+  .pv-ml{background:var(--verde-bg);color:var(--verde-d);border-radius:10px;padding:7px 11px;font-size:.76rem;font-weight:700}
+  .pv-accion{align-self:center;font-size:.72rem;color:var(--mut);font-style:italic;padding:2px 0}
+  .pv-cond{border:1.5px dashed var(--rosa);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#fff}
+  .pv-cond .pv-cond-t{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--rosa-d)}
+  @media(max-width:860px){ .ed-grid{grid-template-columns:1fr} .ed-prev{position:static} }
+  .modal h2{display:flex;justify-content:space-between;align-items:center}
+  .sec{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-bottom:12px}
+  .sec .h{font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:7px;margin-bottom:2px}
+  .sec .sub{font-size:.78rem;color:var(--mut);margin-bottom:6px}
+  .hint{font-size:.76rem;color:var(--gold);background:var(--goldbg);border-radius:9px;padding:8px 10px;margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:700}
+  .badge{padding:2px 9px;border-radius:20px;font-size:.74rem;font-weight:700}
+  .b-sent{background:var(--verde-bg);color:var(--verde-d)}.b-skipped{background:var(--crema2);color:var(--mut)}
+  .b-error{background:var(--dangerbg);color:var(--danger)}.b-pending{background:#eee;color:#666}
+  .b-duplicate{background:var(--rosa-bg);color:var(--rosa-d)}.b-throttled{background:var(--goldbg);color:var(--gold)}
+  .muted{color:var(--mut);font-size:.85rem}.hide{display:none}
+  .acct{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .acct .who{display:flex;align-items:center;gap:10px}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 3px var(--verde-bg)}
+  .dot.warn{background:var(--gold);box-shadow:0 0 0 3px var(--goldbg)}
+  .acct b{font-size:1rem}
+  .acct .sub{font-size:.78rem;color:var(--mut)}
+  #login{max-width:380px;margin:12vh auto;text-align:center}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;font-size:.88rem;opacity:0;transition:.25s;pointer-events:none;z-index:99}
+  .toast.show{opacity:1}
+.bloques{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+.bloque{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;background:none;border:1.5px dashed #e8cbd9;border-radius:12px;padding:11px 13px;cursor:pointer;font-family:inherit;color:inherit}
+.bloque:hover{border-color:#c93672;background:#fdf0f6}
+.bloque b{font-size:.85rem}
+.bloque span{font-size:.7rem;opacity:.65;line-height:1.3}
+.bloque.on{border-style:solid;border-color:#17966a;background:#e9f7f1}
+.fbox{background:#fff;border:1.5px solid #f0e3ea;border-radius:14px;padding:12px 14px;margin-top:10px}
+.fbox .fhead{font-weight:700;font-size:.92rem}
+.fbox .fnote{margin:2px 0 0 26px;font-size:.76rem}
+.masinfo{margin-top:8px;font-size:.78rem;color:#8a5670}
+.masinfo summary{cursor:pointer;font-weight:700;color:#a94b76;list-style:none}
+.masinfo summary::-webkit-details-marker{display:none}
+.masinfo summary::before{content:"▸ "}
+.masinfo[open] summary::before{content:"▾ "}
+.masinfo p{margin-top:6px;background:#fdf0f6;border:1px solid #f3c6dd;border-radius:10px;padding:9px 13px}
+  /* ===== Lateral como la home ===== */
+  .sb{position:fixed;left:0;top:0;bottom:0;width:236px;z-index:50;background:#1a352a;color:#cfe0d6;padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+  .sb .logo{font-weight:800;font-size:19px;color:#fff;padding:2px 10px 16px}
+  .sb .logo b{color:var(--rosa)}
+  .sb .grupo{font-size:10.5px;font-weight:800;letter-spacing:.12em;opacity:.55;padding:14px 10px 6px;text-transform:uppercase}
+  .sb a.item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:#cfe0d6;text-decoration:none;font-weight:700;font-size:13.5px;transition:background .12s}
+  .sb a.item:hover{background:#264a3a}
+  .sb a.item.on{background:var(--rosa);color:#fff}
+  .sb a.item .pic{width:26px;height:26px;border-radius:8px;background:#264a3a;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .sb a.item.on .pic{background:rgba(255,255,255,.2)}
+  .sb .fondo{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}
+  .sb .salir{width:100%;background:none;border:1px solid rgba(255,255,255,.22);color:#cfe0d6;border-radius:999px;padding:8px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .sb .salir:hover{border-color:var(--rosa);color:#fff;background:var(--rosa)}
+  #app:not(.hide){padding-left:236px}
+  .topbar{display:none;position:sticky;top:0;z-index:40;background:#1a352a;color:#fff;padding:12px 16px;align-items:center;gap:12px}
+  .topbar .ham{background:none;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:2px 6px}
+  .topbar .tl{font-weight:800;font-size:16px}
+  .topbar .tl b{color:var(--rosa)}
+  .velo{display:none;position:fixed;inset:0;background:rgba(20,40,30,.45);z-index:45}
+  .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:55;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;box-shadow:0 -6px 24px rgba(30,58,45,.10)}
+  .tabbar .tab2{flex:1;min-width:0;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--mut);font-weight:800;font-size:10px;cursor:pointer;padding:4px 2px;font-family:inherit}
+  .tabbar .tab2 .i{font-size:20px;line-height:1}
+  .tabbar .tab2.on{color:var(--rosa)}
+  @media(max-width:860px){
+    #app:not(.hide){padding-left:0}
+    .sb{transform:translateX(-102%);transition:transform .22s ease;box-shadow:20px 0 60px rgba(0,0,0,.3)}
+    body.sb-abierto .sb{transform:none}
+    body.sb-abierto .velo{display:block}
+    .topbar{display:flex}
+    .tabbar{display:flex}
+    .wrap{padding-bottom:82px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .tabs{max-width:100%;overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div id="login" class="card">
+  <h2>🌸 Contestador Automático</h2>
+  <p class="muted">La Agencia de IA · panel de Instagram</p>
+  <input type="password" id="pass" placeholder="Contraseña de administración" style="text-align:center">
+  <div style="margin-top:12px"><button class="ghost" onclick="login()">Entrar como admin</button></div>
+  <p id="loginErr" class="hint hide"></p>
+</div>
+
+<div id="app" class="hide">
+  <div class="velo" onclick="document.body.classList.remove('sb-abierto')"></div>
+  <aside class="sb">
+    <div class="logo">🌸 <b>Contestador</b></div>
+    <div class="grupo">Herramientas</div>
+    <a class="item on" href="./"><span class="pic">📩</span> Contestador</a>
+    <div class="fondo"><button class="salir" onclick="salirPanel()">Salir</button></div>
+  </aside>
+  <div class="topbar"><button class="ham" onclick="document.body.classList.add('sb-abierto')">☰</button><span class="tl">📩 Contestador</span></div>
+  <nav class="tabbar" aria-label="Menú">
+    <a class="tab2 on" href="./"><span class="i">📩</span>Contestador</a>
+    <button class="tab2" type="button" onclick="document.body.classList.add('sb-abierto')"><span class="i">☰</span>Más</button>
+  </nav>
+  <header>
+    <h1>🌸 Contestador Automático de Instagram</h1>
+    <p>Comentan una palabra clave en tus posts → reciben tu DM al momento. En automático, 24/7.</p>
+  </header>
+  <div class="wrap">
+
+    <div class="card acct" id="acctCard" style="margin-bottom:18px">
+      <div class="who"><span class="dot"></span><div><b id="acctName">Cargando cuenta…</b><div class="sub" id="acctSub"></div></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a id="igConnect" href="#"><button class="btn-v sm">🔗 Conectar Instagram</button></a>
+        <button class="ghost sm" id="mlBtn" onclick="connectML()">📧 Conectar MailerLite</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="tabs">
+      <div class="tab on" data-t="autos" onclick="tab('autos')">⚡ Automatizaciones</div>
+      <div class="tab" data-t="contactos" onclick="tab('contactos')">👥 Contactos</div>
+      <div class="tab" data-t="hist" onclick="tab('hist')">🕑 Historial</div>
+      <div class="tab" data-t="faqs" onclick="tab('faqs')">💬 Preguntas frecuentes</div>
+    </div>
+
+    <!-- AUTOS -->
+    <div id="autos">
+      <div style="margin-bottom:14px"><button class="btn" onclick="openEditor()">➕ Nueva automatización</button></div>
+      <div id="rules"><p class="muted">Cargando…</p></div>
+    </div>
+
+    <!-- CONTACTOS -->
+    <div id="contactos" class="hide card"><div id="contactsBox"><p class="muted">Cargando…</p></div></div>
+
+    <!-- HISTORIAL -->
+    <div id="hist" class="hide card"><div id="eventsBox"><p class="muted">Cargando…</p></div></div>
+
+    <!-- FAQS -->
+    <div id="faqs" class="hide">
+      <div class="card" style="margin-bottom:14px">
+        <b>💬 Atención al cliente automática</b>
+        <p class="muted" style="margin-top:6px;font-size:.85rem">Cuando alguien te escribe por DM y su mensaje coincide con una pregunta frecuente, se responde sola. Si no coincide claramente, <b>calla</b> (mejor silencio que responder mal). Y si tú has respondido a mano a esa persona en las últimas 24 h, el bot no se mete. Las marcadas con ⭐ salen como <b>preguntas sugeridas</b> al abrir tu chat de Instagram (máx. 4).</p>
+      </div>
+      <div style="margin-bottom:14px"><button class="btn" onclick="openFaqEditor()">➕ Nueva pregunta frecuente</button></div>
+      <div id="faqsBox"><p class="muted">Cargando…</p></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDITOR FAQ -->
+<div class="overlay" id="faqOverlay">
+  <div class="modal" style="max-width:560px">
+    <h2><span id="faqTitle">➕ Nueva pregunta frecuente</span> <button class="ghost sm" onclick="closeFaqEditor()">✕</button></h2>
+    <input type="hidden" id="fqId">
+    <div id="fqCuentaWrap" class="hide">
+      <label>¿En qué cuenta de Instagram?</label>
+      <select id="fqCuenta"></select>
+    </div>
+    <label>La pregunta <span class="muted">(como saldría en el menú del chat)</span></label>
+    <input type="text" id="fqPregunta" maxlength="80" placeholder="Ej: ¿Cuánto cuesta la formación?">
+    <label>Palabras que la disparan <span class="muted">(separadas por comas)</span></label>
+    <input type="text" id="fqKeywords" placeholder="precio, cuánto cuesta, coste, tarifa">
+    <label>Respuesta</label>
+    <textarea id="fqRespuesta" placeholder="La respuesta que recibirá al momento…"></textarea>
+    <label>Botón con enlace <span class="muted">(opcional)</span></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" id="fqBtnTxt" maxlength="20" placeholder="Ver la info 💫" style="flex:1;min-width:130px">
+      <input type="text" id="fqBtnUrl" placeholder="https://…" style="flex:2;min-width:180px">
+    </div>
+    <label>Imagen <span class="muted">(opcional)</span></label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button type="button" class="ghost sm" onclick="document.getElementById('fqFile').click()">🖼️ Subir imagen</button>
+      <span id="fqImgChip" class="muted" style="font-size:.8rem">Sin imagen</span>
+      <input type="file" id="fqFile" accept="image/png,image/jpeg,image/gif,image/webp" class="hide" onchange="subirFaqImg(this)">
+      <input type="hidden" id="fqImgUrl">
+    </div>
+    <label class="switch" style="margin-top:12px"><input type="checkbox" id="fqMenu"> ⭐ Mostrarla en el menú del chat <span class="muted">(máx. 4)</span></label>
+    <label class="switch" style="margin-top:6px"><input type="checkbox" id="fqActiva" checked> Activa</label>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn" onclick="saveFaq()">Guardar</button>
+      <button class="ghost" onclick="closeFaqEditor()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2><span id="edTitle">➕ Nueva automatización</span> <button class="ghost sm" onclick="closeEditor()">✕</button></h2>
+    <input type="hidden" id="rid">
+
+    <div class="ai-box">
+      <div class="ai-h">✨ ¿Te ayudo a escribir los mensajes?</div>
+      <div class="ai-sub">Cuéntame en una línea qué regalas y el tono. Te propongo varias respuestas, varios DMs, el botón y los mensajes de email/entrega — listos para pegar.</div>
+      <textarea id="aiBrief" placeholder="Ej: una guía gratis con 100 prompts para vender online sin sonar a robot, tono cercano y con humor"></textarea>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="btn-v sm" id="aiBtn" onclick="generarConIA()">✨ Generar sugerencias</button>
+        <button type="button" class="ghost sm" onclick="document.getElementById('aiPdf').click()">📎 Adjuntar tu lead magnet (PDF)</button>
+        <input type="file" id="aiPdf" accept="application/pdf" class="hide" onchange="cogerAiPdf(this)">
+        <span id="aiPdfChip" class="muted" style="font-size:.78rem">Si lo adjuntas, la IA se lo lee y escribe los textos con lo que hay dentro de verdad.</span>
+        <span id="aiMsg" class="muted" style="font-size:.82rem"></span>
+      </div>
+    </div>
+
+    <div class="ed-grid">
+    <div class="ed-pasos">
+    <div class="sec">
+      <div class="h">1 · Alguien comenta tu palabra 💬</div><span class="flecha">↓</span>
+      <div class="sub">Cuando alguien comente esta palabra en tus posts, arranca el recorrido.</div>
+      <div id="cuentaWrap" class="hide">
+        <label>¿En qué cuenta de Instagram?</label>
+        <select id="rule_account" onchange="cambioCuentaRegla()"></select>
+        <p class="muted" style="font-size:.78rem;margin-top:4px">La automatización vigilará los posts de esta cuenta. Una vez guardada, no se puede mover de cuenta (duplícala si la quieres en otra).</p>
+      </div>
+      <div class="row">
+        <div><label>Palabra clave <span class="muted">(o varias)</span></label><input type="text" id="keyword" placeholder="Ej: QUIERO, TUTORIAL, GUÍA"></div>
+        <div><label>Coincidencia</label><select id="match_type">
+          <option value="contains">El comentario contiene la palabra</option>
+          <option value="exact">El comentario es exactamente la palabra</option>
+        </select></div>
+      </div>
+      <p class="muted" style="font-size:.78rem;margin-top:4px">💡 ¿Varias palabras? Sepáralas con comas — con que el comentario diga <b>una</b> de ellas, se dispara.</p>
+      <label>¿En qué posts?</label>
+      <select id="post_scope" onchange="onScope()">
+        <option value="all">📱 Todos los posts (y respuestas a tus stories)</option>
+        <option value="one">🖼️ Un post concreto</option>
+        <option value="link">🔗 Un post que no sale en tu feed (reel de prueba) — pego el enlace</option>
+        <option value="next">⏭️ El próximo post que publique</option>
+        <option value="story">📖 Todas mis stories</option>
+        <option value="onestory">🎯 Una story concreta (de las activas ahora)</option>
+      </select>
+      <p class="muted" id="storyNote" style="font-size:.78rem;margin-top:4px">📖 Con «Todos los posts», la automatización también salta cuando alguien <b>responde a una story tuya</b> con la palabra clave. Para la típica story de «responde X y te lo mando», esta es la opción.</p>
+      <div id="nextPicker" class="hide">
+        <label style="margin-top:10px">¿A partir de cuándo?</label>
+        <input type="datetime-local" id="next_after">
+        <p class="muted" style="font-size:.78rem;margin-top:4px">⏭️ Se enganchará al <b>primer post que publiques a partir de esa fecha</b> y se quedará ahí para siempre. Lo que publiques antes queda fuera, aunque comenten la palabra.<br>💡 ¿Lo tienes programado? Pon la hora a la que se publica, un pelín antes. Así no te lo roba ningún post de estos días.</p>
+      </div>
+      <div id="storyPicker" class="hide">
+        <div class="muted" style="margin-top:8px">Elige la story (solo salen las que están activas ahora — duran 24 h):</div>
+        <div id="storyGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+      </div>
+      <div id="postPicker" class="hide">
+        <div class="muted" style="margin-top:8px">Elige el post (toca uno):</div>
+        <div id="mediaGrid"></div>
+      </div>
+      <div id="linkPicker" class="hide">
+        <div class="muted" style="margin-top:8px">Pega el enlace del reel (aunque no salga en tu feed público). Tiene que estar publicado para que Instagram nos deje automatizarlo.</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="reel_link" placeholder="https://www.instagram.com/reel/XXXXXXXX/" style="flex:1 1 260px;padding:9px 12px;border:1.5px solid #e6dcd4;border-radius:9px;font:inherit">
+          <button type="button" class="btn-v sm" onclick="buscarReelPorEnlace()">🔎 Buscar</button>
+        </div>
+        <p class="muted" id="reelLinkMsg" style="font-size:.82rem;margin:6px 0 0"></p>
+      </div>
+      <input type="hidden" id="media_id">
+      <label class="switch fhead hide" id="enHistoriasWrap" style="margin-top:10px"><input type="checkbox" id="en_historias"> 🔁 Que salte también en tus historias con la misma palabra</label>
+      <p class="muted hide" id="enHistoriasNote" style="font-size:.78rem;margin-top:2px">Si compartes este post a tu story, quien responda a la story con la palabra recibirá exactamente lo mismo. Se crea y mantiene sola una copia para historias (no tienes que duplicar nada).</p>
+    </div>
+
+    <div class="sec">
+      <div class="h">2 · Le respondes en el post ↩️ <span class="muted">(opcional)</span></div><span class="flecha">↓</span>
+      <div class="sub">Se publica como respuesta visible debajo de su comentario — tipo "¡Te lo mando por DM! 📩". Avisa de que mire sus mensajes y anima a otros a comentar. Si pones varias, rotan al azar para sonar natural. Déjalo vacío si no la quieres. 💡 Enter añade otra variante · Shift+Enter hace salto de línea.</div>
+      <div class="msgs" id="pubs"></div>
+      <button class="ghost sm" onclick="addPub()">+ Añadir otra variante</button>
+      <p id="pubEstado" style="font-size:.8rem;margin-top:8px;font-weight:600"></p>
+    </div>
+
+    <div class="sec">
+      <div class="h">3 · Le llega tu DM 📩</div><span class="flecha">↓</span>
+      <div class="sub">Lo que recibe en privado. Si pones varios, se envía uno al azar. 💡 Enter añade otro · Shift+Enter hace salto de línea.</div>
+      <div class="msgs" id="msgs"></div>
+      <button class="ghost sm" onclick="addMsg()">+ Añadir otro mensaje</button>
+      <label>Botón dentro del DM <span class="muted">(vacío = sin botón, solo el mensaje)</span></label>
+      <input type="text" id="button_text" placeholder="Ej: ¡Quiero el tutorial!" maxlength="20" oninput="syncEmail()">
+    </div>
+
+    <div class="sec">
+      <div class="h">4 · Pulsa el botón… y tú conviertes 👆</div>
+      <div class="sub">Qué pasa cuando le da al botón del DM: pedir que te siga, pedir su email y entregarle tu recurso.</div>
+      <div id="btnHint" style="background:#fdf0f6;border:1px solid #f3c6dd;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.82rem;color:#8a5670">💡 Este paso se abre cuando pones <b>texto al botón del DM</b> (justo arriba, en el paso 3). Instagram solo permite pedir el email cuando la persona pulsa un botón — así confirma que le interesa. Es el flujo oficial de Meta.</div>
+      <div id="btnFields" class="hide">
+        <details class="masinfo"><summary>🛡️ Por qué Instagram lo pide así</summary><p>Pedir que te siga o pedir el email solo se hace <b>después</b> de que pulsen el botón del DM (el paso de arriba). Es la norma de Instagram para proteger tu cuenta: no se piden datos ni condiciones sin que la persona confirme antes con un clic.</p></details>
+
+        <div class="fbox">
+          <div class="fhead">🖼️ Imagen nada más pulsar <span class="muted">(opcional)</span></div>
+          <p class="muted fnote">Se le envía justo después del clic: le recuerda qué pidió y le mantiene el interés mientras le pides el follow o el email. Solo se envía la primera vez que pulsa.</p>
+          <div class="bloques">
+            <button type="button" class="bloque" id="bloqueClickImg" onclick="document.getElementById('fileClickImg').click()"><b>🖼️ Subir imagen</b><span>Una portada, un adelanto, un "esto es lo tuyo"</span></button>
+          </div>
+          <input type="file" id="fileClickImg" accept="image/png,image/jpeg,image/gif,image/webp" class="hide" onchange="subirAdjunto(this,'click_image')">
+          <div id="clickAdjunto" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+          <input type="hidden" id="click_image_url">
+        </div>
+
+        <div class="fbox">
+          <label class="switch fhead"><input type="checkbox" id="require_follow" onchange="syncEmail()"> Pedir que me siga 🫶</label>
+          <p class="muted fnote">Solo se lo pide a quien aún no te sigue; si ya te sigue, pasa directo.</p>
+          <div id="followFields" class="hide">
+            <label>Mensaje si aún no te sigue</label>
+            <textarea id="follow_prompt" placeholder="Para poder enviártelo necesito que me sigas 😊 Sígueme y vuelve a darle al botón 👇"></textarea>
+            <details class="masinfo"><summary>ℹ️ Cómo funciona</summary><p>Se comprueba al pulsar el botón. Si YA te sigue, no ve nada de esto: pasa directo al siguiente paso. Si no te sigue, recibe este mensaje con un botón «¡Ya te sigo!»; cuando te siga y lo pulse, el recorrido continúa.</p></details>
+          </div>
+        </div>
+
+        <div class="fbox">
+          <label class="switch fhead"><input type="checkbox" id="ask_email" onchange="syncEmail()"> Pedir su email 📧</label>
+          <p class="muted fnote">🧠 Si ya nos dejó su email en otra automatización tuya, no se lo vuelve a pedir: entrega directa (y aun así entra en tu grupo de MailerLite).</p>
+          <div id="emailFields" class="hide">
+            <label>Mensaje pidiendo el email <span class="muted">(sale al pulsar el botón)</span></label>
+            <textarea id="email_prompt" placeholder="¡Genial! Déjame tu email y te lo envío ✍️"></textarea>
+            <p class="muted" id="emailDest" style="margin-top:4px;font-size:.78rem"></p>
+            <div id="mlGroupWrap">
+              <label>Grupo de MailerLite</label>
+              <select id="mailerlite_group_id"><option value="">— Sin grupo (lista general) —</option></select>
+            </div>
+            <label style="margin-top:10px">🏷️ Etiqueta para Campañas <span class="muted">(opcional)</span></label>
+            <input id="rule_etiqueta" placeholder="p. ej. resenas" maxlength="40">
+            <p class="muted" style="margin-top:4px;font-size:.78rem">Cada email capturado aquí entra en 📮 Campañas con esta etiqueta. Así luego puedes enviar una campaña o descargar el CSV solo de los que comentaron en este post.</p>
+          </div>
+        </div>
+
+        <div class="fbox">
+          <div class="fhead">🎁 La entrega</div>
+          <label id="finalLabel">Mensaje al pulsar el botón <span class="muted">(aquí va tu enlace o recurso)</span></label>
+          <textarea id="final_message" placeholder="¡Aquí lo tienes! 👉 https://tu-enlace.com"></textarea>
+          <label style="margin-top:12px">Añade bloques a la entrega <span class="muted">(opcional)</span></label>
+          <div class="bloques">
+            <button type="button" class="bloque" onclick="document.getElementById('fileImg').click()"><b>🖼️ Imagen</b><span>Se envía justo antes del mensaje</span></button>
+            <button type="button" class="bloque" onclick="document.getElementById('fileAud').click()"><b>🎙️ Audio</b><span>Ideal para una nota de voz tuya</span></button>
+            <button type="button" class="bloque" id="bloqueLink" onclick="toggleLinkBtn()"><b>🔗 Botón con enlace</b><span>Tu enlace como botón, no pegado al texto</span></button>
+          </div>
+          <div id="linkFields" class="hide">
+            <label>Texto del botón del enlace <span class="muted">(máx. 20 caracteres)</span></label>
+            <input type="text" id="link_button_text" maxlength="20" placeholder="Descargar tutorial 📥" oninput="marcarBloqueLink()">
+            <label>Enlace del botón</label>
+            <input type="text" id="link_button_url" placeholder="https://tu-enlace.com" oninput="marcarBloqueLink()">
+            <label style="margin-top:10px">Segundo botón <span class="muted">(opcional)</span></label>
+            <input type="text" id="link_button2_text" maxlength="20" placeholder="Ej: Entrar en mi web" oninput="marcarBloqueLink()">
+            <input type="text" id="link_button2_url" placeholder="https://otro-enlace.com" oninput="marcarBloqueLink()" style="margin-top:6px">
+            <label style="margin-top:10px">Tercer botón <span class="muted">(opcional — Instagram permite hasta 3)</span></label>
+            <input type="text" id="link_button3_text" maxlength="20" placeholder="Ej: Ver más recursos" oninput="marcarBloqueLink()">
+            <input type="text" id="link_button3_url" placeholder="https://otro-enlace-mas.com" oninput="marcarBloqueLink()" style="margin-top:6px">
+            <p class="muted" style="margin-top:4px;font-size:.78rem">El mensaje de entrega llegará con estos botones debajo, como en ManyChat (hasta 3). Deja los campos vacíos si no los quieres.</p>
+          </div>
+          <input type="file" id="fileImg" accept="image/png,image/jpeg,image/gif,image/webp" class="hide" onchange="subirAdjunto(this,'image')">
+          <input type="file" id="fileAud" accept="audio/*,.m4a,.mp3,.aac,.wav" class="hide" onchange="subirAdjunto(this,'audio')">
+          <div id="adjuntos" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>
+          <input type="hidden" id="image_url"><input type="hidden" id="audio_url">
+          <details class="masinfo"><summary>ℹ️ Sobre la imagen y el audio</summary><p>Llegan como mensajes justo antes del texto de entrega. El audio es experimental: Instagram acepta mp3, m4a, aac y wav.</p></details>
+        </div>
+        <p class="muted" id="flujoNota" style="margin-top:6px;font-size:.78rem"></p>
+      </div>
+    </div>
+
+    </div><!-- /ed-pasos -->
+
+    <aside class="ed-prev">
+      <div class="pt">👀 Así lo vive quien comenta</div>
+      <div id="prevBox"></div>
+    </aside>
+    </div><!-- /ed-grid -->
+
+    <div class="sec" style="margin-top:14px">
+      <label class="switch"><input type="checkbox" id="is_active" checked> Automatización activa (LIVE)</label>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-v" onclick="saveRule()">Guardar</button>
+      <button class="ghost" onclick="closeEditor()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: QUIÉN COMENTÓ -->
+<div class="overlay" id="statsOverlay">
+  <div class="modal" style="max-width:680px">
+    <h2><span id="statsTitle">📊 Estadísticas</span> <button class="ghost sm" onclick="closeStats()">✕</button></h2>
+    <div id="statsChips" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 10px"></div>
+    <div id="statsAcciones" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px"></div>
+    <div id="statsBody" style="max-height:56vh;overflow:auto"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+// Configuración pública (panel/config.js). Ninguna clave de servicio vive en el panel.
+const CFG=window.CONTESTADOR_CONFIG||{};
+const API=(CFG.FUNCTIONS_URL||"")+"/ig-admin";
+// La contraseña de administración solo vive en sessionStorage (se borra al cerrar la pestaña)
+let PASS=sessionStorage.getItem("ig_admin_pass")||"";
+let ML_GROUPS=[], ML_CONNECTED=false;
+let CONTACTS=[], EVENTS=[], MEDIA=[], MEDIA_AFTER=null;
+let CUENTAS=[];   // multi-cuenta: todas tus cuentas de Instagram conectadas
+let PREF_CUENTA=""; // cuenta preseleccionada (reservado)
+function cuentaRegla(){
+  const s=document.getElementById("rule_account");
+  return (CUENTAS.length>1 && s && s.value) ? s.value : (PREF_CUENTA || CUENTAS[0]?.ig_user_id || "");
+}
+function nombreCuenta(id){ const a=CUENTAS.find(x=>String(x.ig_user_id)===String(id)); return a?("@"+(a.username||a.ig_user_id)):("@"+(id||"?")); }
+function cambioCuentaRegla(){ MEDIA=[]; MEDIA_AFTER=null; if(document.getElementById("post_scope").value==="one") loadMedia(); }
+
+async function loadMedia(){
+  const g=document.getElementById("mediaGrid");
+  if(!MEDIA.length){
+    g.innerHTML='<p class="muted">Cargando posts…</p>';
+    try{const d=await api("list_media",{ig_user_id:cuentaRegla()});MEDIA=d.media||[];MEDIA_AFTER=d.after||null;}
+    catch(e){g.innerHTML='<p class="muted">No se pudieron cargar los posts.</p>';return;}
+  }
+  renderMedia();
+}
+function renderMedia(){
+  const g=document.getElementById("mediaGrid");
+  if(!MEDIA.length){g.innerHTML='<p class="muted">No hay posts recientes.</p>';return;}
+  const sel=document.getElementById("media_id").value;
+  g.className="mgrid";
+  g.innerHTML=MEDIA.map(m=>`<div class="m ${m.id===sel?"sel":""}" title="${esc(m.caption)}" onclick="pickMedia('${m.id}')">${m.thumb?`<img src="${esc(m.thumb)}" loading="lazy">`:"🖼️"}</div>`).join("")
+    +(MEDIA_AFTER?`<button type="button" id="btnMasMedia" class="m" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;font:700 12px/1.2 inherit;color:#c93672;background:#fdf0f6;border:1.5px dashed #f3c6dd;cursor:pointer" onclick="masMedia()">⤵<span>más posts</span></button>`:"");
+}
+async function masMedia(){
+  const b=document.getElementById("btnMasMedia");
+  if(b){ b.disabled=true; b.innerHTML="⏳"; }
+  try{
+    const d=await api("list_media",{after:MEDIA_AFTER,ig_user_id:cuentaRegla()});
+    MEDIA=MEDIA.concat(d.media||[]); MEDIA_AFTER=d.after||null;
+  }catch(e){ alert("⚠️ No se pudieron cargar más posts"); }
+  renderMedia();
+}
+function pickMedia(id){document.getElementById("media_id").value=id;renderMedia();}
+// 🔎 Ata la automatización a un reel pegando su enlace (aunque no salga aún en la cuadrícula)
+async function buscarReelPorEnlace(){
+  const inp=document.getElementById("reel_link");
+  const msg=document.getElementById("reelLinkMsg");
+  const url=(inp.value||"").trim();
+  const m=url.match(/instagram\.com\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if(!m){ msg.innerHTML="⚠️ Pega el enlace del reel (algo como instagram.com/reel/XXXX/)."; return; }
+  const code=m[1];
+  msg.textContent="Buscando tu reel…";
+  try{
+    // recarga fresca (por si el reel es recién subido y la lista estaba en memoria vieja)
+    const d0=await api("list_media",{ig_user_id:cuentaRegla()}); MEDIA=d0.media||[]; MEDIA_AFTER=d0.after||null;
+    let found=MEDIA.find(x=>(x.permalink||"").includes("/"+code));
+    let guard=0;
+    while(!found && MEDIA_AFTER && guard<8){
+      guard++;
+      const d=await api("list_media",{after:MEDIA_AFTER,ig_user_id:cuentaRegla()});
+      MEDIA=MEDIA.concat(d.media||[]); MEDIA_AFTER=d.after||null;
+      found=MEDIA.find(x=>(x.permalink||"").includes("/"+code));
+    }
+    if(found){
+      document.getElementById("media_id").value=found.id;
+      msg.innerHTML=`✅ ¡Reel encontrado y elegido!<div style="display:flex;gap:8px;align-items:center;margin-top:6px">${found.thumb?`<img src="${esc(found.thumb)}" style="width:46px;height:46px;object-fit:cover;border-radius:8px">`:"🖼️"}<span class="muted">${esc(found.caption||"")}</span></div><div style="margin-top:6px">Ya solo pon la palabra clave arriba y guarda 👍</div>`;
+    }else{
+      msg.innerHTML="😕 No lo encuentro entre tus publicaciones. Si lo acabas de subir, dale 1 minuto (Instagram tarda un poco en mostrarlo) y vuelve a pulsar 🔎 Buscar.";
+    }
+  }catch(e){ msg.innerHTML="⚠️ No pude cargar tus posts para buscarlo. Prueba otra vez en un momento."; }
+}
+async function loadStories(){
+  const g=document.getElementById("storyGrid");
+  g.innerHTML='<span class="muted">Cargando tus stories…</span>';
+  try{
+    const d=await api("list_stories",{ig_user_id:cuentaRegla()});
+    const st=d.stories||[];
+    if(!st.length){ g.innerHTML='<span class="muted">Ahora mismo no tienes ninguna story activa. Publica la story primero y vuelve aquí.</span>'; return; }
+    const sel=document.getElementById("media_id").value;
+    g.innerHTML=st.map(x=>`<div onclick="pickStory('${x.id}')" style="width:84px;cursor:pointer;text-align:center">
+      <div style="width:84px;height:130px;border-radius:12px;overflow:hidden;border:3px solid ${sel==="STORY:"+x.id?"var(--verde,#17966a)":"#e3d9d0"};background:#f3f1ee">
+        ${x.thumb?`<img src="${x.thumb}" style="width:100%;height:100%;object-fit:cover">`:`<div style="padding-top:50px">${x.type==="VIDEO"?"🎬":"🖼️"}</div>`}
+      </div>
+      <div class="muted" style="font-size:.68rem;margin-top:3px">${x.hace||""}</div></div>`).join("");
+  }catch(e){ g.innerHTML='<span class="muted">⚠️ '+esc(e.message)+'</span>'; }
+}
+window.pickStory=function(id){ document.getElementById("media_id").value="STORY:"+id; loadStories(); toast("Story elegida ✓"); }
+function onScope(){
+  const s=document.getElementById("post_scope").value;
+  const sn=document.getElementById("storyNote");
+  if(sn){
+    sn.style.display = (s==="all"||s==="story"||s==="onestory") ? "" : "none";
+    sn.innerHTML = s==="story"
+      ? '📖 Salta cuando alguien <b>responde a cualquier story tuya</b> con la palabra clave — los comentarios en posts la ignoran. Si usas la misma palabra en algún post, no se pisan.'
+      : s==="onestory"
+      ? '🎯 Solo salta con respuestas a ESA story. Ojo: las stories viven 24 h — cuando caduque, la automatización deja de dispararse (puedes reeditarla y apuntarla a otra story).'
+      : '📖 Con «Todos los posts», la automatización también salta cuando alguien <b>responde a una story tuya</b> con la palabra clave. Para la típica story de «responde X y te lo mando», esta es la opción.';
+  }
+  document.getElementById("postPicker").classList.toggle("hide",s!=="one");
+  document.getElementById("storyPicker").classList.toggle("hide",s!=="onestory");
+  document.getElementById("linkPicker").classList.toggle("hide",s!=="link");
+  document.getElementById("nextPicker").classList.toggle("hide",s!=="next");
+  if(s==="next" && !document.getElementById("next_after").value) document.getElementById("next_after").value=_aLocalInput(new Date().toISOString());
+  // la casilla "también en historias" solo tiene sentido para un post concreto, el próximo o uno pegado por enlace
+  const verHist = (s==="one"||s==="next"||s==="link");
+  document.getElementById("enHistoriasWrap").classList.toggle("hide", !verHist);
+  document.getElementById("enHistoriasNote").classList.toggle("hide", !verHist);
+  if(!verHist){ const eh=document.getElementById("en_historias"); if(eh) eh.checked=false; }
+  if(s==="all")document.getElementById("media_id").value="";
+  else if(s==="next")document.getElementById("media_id").value="NEXT";
+  else if(s==="story")document.getElementById("media_id").value="STORIES";
+  else if(s==="onestory"){ if(!document.getElementById("media_id").value.startsWith("STORY:")) document.getElementById("media_id").value=""; loadStories(); }
+  else if(s==="link"){ const mv=document.getElementById("media_id").value; if(mv==="NEXT"||mv==="STORIES"||mv.startsWith("STORY:")) document.getElementById("media_id").value=""; }
+  else loadMedia();
+}
+
+function _aLocalInput(iso){
+  if(!iso) return "";
+  const d=new Date(iso); if(isNaN(d.getTime())) return "";
+  const p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function _aISO(v){ if(!v) return null; const d=new Date(v); return isNaN(d.getTime())?null:d.toISOString(); }
+
+function downloadXLS(filename,headers,rows){
+  let html='<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1"><tr>'+headers.map(h=>`<th>${esc(h)}</th>`).join("")+"</tr>";
+  rows.forEach(r=>{html+="<tr>"+r.map(c=>`<td>${esc(String(c==null?"":c))}</td>`).join("")+"</tr>";});
+  html+="</table></body></html>";
+  const blob=new Blob(["﻿"+html],{type:"application/vnd.ms-excel"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
+function exportContacts(){
+  if(!CONTACTS.length)return toast("No hay contactos que exportar");
+  downloadXLS("contactos.xls",["Usuario","Email","Interacciones","Última vez"],
+    CONTACTS.map(c=>["@"+(c.username||""),c.email||"",c.interactions,new Date(c.last_seen).toLocaleString("es-ES")]));
+}
+function exportEvents(){
+  if(!EVENTS.length)return toast("No hay eventos que exportar");
+  downloadXLS("historial.xls",["Cuándo","Post","Usuario","Comentario","Automatización","Estado"],
+    EVENTS.map(e=>{const m=MEDIA.find(x=>x.id===e.media_id);return [new Date(e.created_at).toLocaleString("es-ES"),m?m.caption:(e.media_id||""),"@"+(e.commenter_username||""),e.comment_text||"",e.automation||"",lbl(e.dm_status)];}));
+}
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300);}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function toggleLinkBtn(){
+  document.getElementById("linkFields").classList.toggle("hide");
+  marcarBloqueLink();
+}
+function marcarBloqueLink(){
+  const on=["link_button_text","link_button_url","link_button2_text","link_button2_url","link_button3_text","link_button3_url"].some(i=>document.getElementById(i).value.trim());
+  document.getElementById("bloqueLink").classList.toggle("on",on);
+}
+function pintarAdjuntos(){
+  const img=document.getElementById("image_url").value, aud=document.getElementById("audio_url").value;
+  const box=document.getElementById("adjuntos"); if(!box) return; let h="";
+  if(img) h+=`<span class="chip">🖼️ imagen <button type="button" style="border:none;background:none;cursor:pointer;color:inherit" onclick="quitarAdjunto('image_url')" aria-label="Quitar imagen">✕</button></span>`;
+  if(aud) h+=`<span class="chip">🎙️ audio <button type="button" style="border:none;background:none;cursor:pointer;color:inherit" onclick="quitarAdjunto('audio_url')" aria-label="Quitar audio">✕</button></span>`;
+  box.innerHTML=h||'<span class="muted" style="font-size:.78rem">Sin adjuntos</span>';
+  const cbox=document.getElementById("clickAdjunto");
+  if(cbox){
+    const cimg=document.getElementById("click_image_url").value;
+    cbox.innerHTML=cimg?`<span class="chip">🖼️ imagen tras el clic <button type="button" style="border:none;background:none;cursor:pointer;color:inherit" onclick="quitarAdjunto('click_image_url')" aria-label="Quitar imagen">✕</button></span>`:'<span class="muted" style="font-size:.78rem">Sin imagen</span>';
+  }
+  if(typeof renderPreview==="function") try{ renderPreview(); }catch(e){}
+}
+window.quitarAdjunto=(id)=>{ document.getElementById(id).value=""; pintarAdjuntos(); };
+window.subirAdjunto=async(inp,kind)=>{
+  const f=inp.files[0]; if(!f) return; inp.value="";
+  const esAudio=kind==="audio";
+  const max=esAudio?15*1024*1024:8*1024*1024;
+  if(f.size>max){ alert(esAudio?"El audio no puede pasar de 15 MB":"La imagen no puede pasar de 8 MB"); return; }
+  const box=document.getElementById(kind==="click_image"?"clickAdjunto":"adjuntos"); box.innerHTML='<span class="muted" style="font-size:.78rem">Subiendo… ⏳</span>';
+  try{
+    const b64=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(f); });
+    const d=await api("upload_media",{kind:esAudio?"audio":"image",filename:f.name,data:b64});
+    document.getElementById(kind==="click_image"?"click_image_url":(esAudio?"audio_url":"image_url")).value=d.url;
+  }catch(e){ alert("⚠️ "+(e.message||e)); }
+  pintarAdjuntos();
+};
+// Llamadas al panel: cabecera x-admin-password
+function cabeceras(){ return {"content-type":"application/json","x-admin-password":PASS}; }
+async function api(action,extra={}){
+  const res=await fetch(API,{method:"POST",headers:cabeceras(),body:JSON.stringify({action,...extra})});
+  const data=await res.json().catch(()=>({}));
+  if(res.status===401)throw new Error("unauthorized");
+  if(!res.ok)throw new Error(data.error||"error");
+  return data;
+}
+// Otras funciones del panel (p. ej. el desglose de clics por botón)
+async function apiFn(fn,extra={}){
+  const res=await fetch((CFG.FUNCTIONS_URL||"")+"/"+fn,{method:"POST",headers:cabeceras(),body:JSON.stringify(extra)});
+  const data=await res.json().catch(()=>({}));
+  if(res.status===401)throw new Error("unauthorized");
+  if(!res.ok)throw new Error(data.error||"error");
+  return data;
+}
+
+function salirPanel(){
+  sessionStorage.removeItem("ig_admin_pass");
+  location.reload();
+}
+
+// URL de autorización de Instagram: el callback es la función ig-oauth
+function urlConectarInstagram(){
+  const u=new URL("https://www.instagram.com/oauth/authorize");
+  u.searchParams.set("client_id",CFG.IG_APP_ID||"");
+  u.searchParams.set("redirect_uri",(CFG.FUNCTIONS_URL||"")+"/ig-oauth");
+  u.searchParams.set("response_type","code");
+  u.searchParams.set("scope","instagram_business_basic,instagram_business_manage_comments,instagram_business_manage_messages");
+  u.searchParams.set("enable_fb_login","0");
+  u.searchParams.set("force_authentication","1");
+  return u.toString();
+}
+
+async function entrarPanel(){
+  document.getElementById("login").classList.add("hide");
+  document.getElementById("app").classList.remove("hide");
+  const a=document.getElementById("igConnect");
+  if(a) a.href=urlConectarInstagram();
+  const g=await api("mailerlite_groups").catch(()=>({groups:[],note:"no_key"})); ML_GROUPS=g.groups||[]; ML_CONNECTED=g.note!=="no_key";
+  loadMetrics(); loadAccounts().then(()=>loadRules());
+}
+
+async function login(){
+  PASS=document.getElementById("pass").value.trim();
+  try{
+    await api("list_rules");
+    sessionStorage.setItem("ig_admin_pass",PASS);
+    await entrarPanel();
+  }catch(e){
+    PASS="";
+    const el=document.getElementById("loginErr");
+    el.textContent=e.message==="unauthorized"?"Contraseña incorrecta":"Error: "+e.message;
+    el.classList.remove("hide");
+  }
+}
+
+function tab(t){
+  ["autos","contactos","hist","faqs"].forEach(x=>document.getElementById(x).classList.toggle("hide",x!==t));
+  document.querySelectorAll(".tab").forEach(el=>el.classList.toggle("on",el.dataset.t===t));
+  if(t==="contactos")loadContacts(); if(t==="hist")loadEvents(); if(t==="faqs")loadFaqs();
+}
+
+async function loadMetrics(){
+  try{
+    const {metrics:m}=await api("metrics");
+    document.getElementById("stats").innerHTML=`
+      <div class="stat rosa"><div class="n">${m.sent}</div><div class="l">DMs enviados</div></div>
+      <div class="stat verde"><div class="n">${m.contacts}</div><div class="l">Personas que comentaron</div></div>
+      <div class="stat rosa"><div class="n">${m.emails}</div><div class="l">Emails captados</div></div>
+      <div class="stat verde"><div class="n">${m.sent7}</div><div class="l">Últimos 7 días</div></div>`;
+  }catch(e){}
+}
+
+async function loadRules(){
+  try{
+    const {rules}=await api("list_rules");
+    const el=document.getElementById("rules");
+    if(!rules.length){el.innerHTML='<p class="muted">Aún no hay automatizaciones. Crea la primera ⬆️</p>';return;}
+    el.innerHTML="";
+    rules.forEach(r=>{
+      const vs=(r.reply_variants&&r.reply_variants.length)?r.reply_variants:[r.reply_text||""];
+      const d=document.createElement("div");d.className="rule"+(r.is_active?"":" off");
+      d.innerHTML=`
+        <div class="top">
+          <div style="flex:1">
+            <span class="live ${r.is_active?"":"off"}">${r.is_active?"LIVE":"OFF"}</span>
+            <span class="kw">${esc(r.keyword)}</span>
+            <div class="trig">Comentario que ${r.match_type==="exact"?"es exactamente":"contiene"} “${esc(r.keyword)}” · ${r.media_id?(r.media_id==="NEXT"?"próximo post":(r.media_id==="STORIES"?"todas las stories":(r.media_id.startsWith("STORY:")?"una story concreta":"un post"))):"todos los posts + stories"}</div>
+            <div>
+              ${CUENTAS.length>1?`<span class="chip" style="background:#fdf0f6;color:#c93672">📷 ${esc(nombreCuenta(r.ig_user_id))}</span>`:""}
+              ${vs.length>1?`<span class="chip">${vs.length} mensajes</span>`:""}
+              ${r.button_text?`<span class="chip">botón: ${esc(r.button_text)}</span>`:""}
+              ${r.require_follow?'<span class="chip">🫶 pide seguir</span>':""}
+              ${r.ask_email?'<span class="chip v">pide email → MailerLite</span>':""}
+              ${(r.public_replies&&r.public_replies.length)?'<span class="chip">💬 responde en público</span>':""}
+              ${r.click_image_url?'<span class="chip">🖼️ tras el clic</span>':""}
+              ${r.image_url?'<span class="chip">🖼️ imagen</span>':""}
+              ${r.audio_url?'<span class="chip">🎙️ audio</span>':""}
+            </div>
+          </div>
+          <div class="met">
+            <div><b>${r.sent_count||0}</b> ejecuciones</div>
+            ${r.button_text?`<div><b>${r.ctr||0}%</b> CTR · ${r.click_count||0} clics</div>`:""}
+            ${r.ask_email?`<div><b>${r.email_count||0}</b> emails</div>`:""}
+          </div>
+        </div>
+        <div class="actions">
+          <label class="switch"><input type="checkbox" ${r.is_active?"checked":""} onchange="toggleRule('${r.id}',this.checked)"> ${r.is_active?"Activa":"Inactiva"}</label>
+          <button class="ghost sm" onclick="openRecorrido('${r.id}')">🗺️ Recorrido</button>
+          <button class="ghost sm" onclick="openStats('${r.id}')">📊 Estadísticas</button>
+          <button class="ghost sm" onclick='openEditor(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Editar</button>
+          <button class="ghost sm" onclick='dupRule(${JSON.stringify(r).replace(/'/g,"&#39;")})'>⧉ Duplicar</button>
+          <button class="danger sm" onclick="delRule('${r.id}')">Borrar</button>
+        </div>`;
+      el.appendChild(d);
+    });
+  }catch(e){toast("⚠️ "+e.message);}
+}
+window.openStats=async function(id){
+  document.getElementById("statsOverlay").classList.add("on");
+  document.getElementById("statsTitle").textContent="📊 Estadísticas";
+  document.getElementById("statsChips").innerHTML="";
+  document.getElementById("statsBody").innerHTML='<p class="muted">Cargando…</p>';
+  try{
+    const d=await api("rule_stats",{id});
+    let link=null; try{ link=await apiFn("ig-link-stats",{id}); }catch(_e){}
+    document.getElementById("statsTitle").textContent=`📊 Estadísticas de “${d.keyword}”`;
+    const enviados=d.eventos.filter(e=>e.dm_status==="sent").length;
+    const dups=d.eventos.filter(e=>e.dm_status==="duplicate").length;
+    document.getElementById("statsChips").innerHTML=`
+      <span class="chip">${d.eventos.length} comentarios</span>
+      <span class="chip v">${enviados} DMs enviados</span>
+      ${dups?`<span class="chip">${dups} repetidos</span>`:""}
+      <span class="chip">${d.clicks} clics</span>
+      ${link&&link.total?`<span class="chip">${link.total} clics en botones</span>`:""}
+      <span class="chip v">${d.emails.length} emails</span>`;
+    window._stats={id, keyword:d.keyword, emails:d.emails||[], botones:(link&&link.botones)||[]};
+    document.getElementById("statsAcciones").innerHTML = d.emails.length ? `
+      <button class="ghost sm" onclick="descargarAudiencia()">⬇️ Descargar emails (CSV)</button>
+      <button class="btn sm" onclick="llevarACampanas()">📮 Llevar a Campañas</button>` : "";
+    const ESTADOS={sent:"✅ DM enviado",duplicate:"↩️ ya lo tenía",skipped:"— sin regla",error:"⚠️ error",throttled:"⏸ límite/hora",pending:"⏳ en curso"};
+    let h="";
+    if(d.emails.length){
+      h+=`<p style="font-weight:800;margin:4px 0 8px">📧 Emails captados</p>`;
+      h+=d.emails.map(e=>`<div style="padding:8px 0;border-top:1px dashed var(--line);font-size:.88rem">
+        <b>${esc(e.email)}</b>${e.username?` · @${esc(e.username)}`:""}
+        <span class="muted" style="float:right">${new Date(e.fecha).toLocaleDateString("es-ES",{day:"numeric",month:"short"})}</span></div>`).join("");
+    }
+    if(link && link.botones && link.botones.length){
+      h+=`<p style="font-weight:800;margin:16px 0 8px">🔘 Clics por botón de enlace <span class="muted" style="font-weight:400;font-size:.8rem">— quién pulsó cada uno</span></p>`;
+      h+=link.botones.map((b,i)=>`<div style="padding:9px 0;border-top:1px dashed var(--line);font-size:.86rem">
+        <b>${esc(b.boton)}</b> <span class="muted">— ${b.total} clic${b.total>1?"s":""} · ${b.personas} persona${b.personas>1?"s":""}</span>
+        <button class="ghost sm" style="float:right;padding:2px 9px;font-size:.76rem" onclick="descargarBoton(${i})">⬇️ CSV</button>
+        <div class="muted" style="font-size:.78rem;margin-top:3px;line-height:1.5">${b.quien.map(q=>"@"+esc(String(q.username||"").replace(/^@/,""))+(q.veces>1?` (${q.veces})`:"")).join(", ")}</div>
+      </div>`).join("");
+    }
+    h+=`<p style="font-weight:800;margin:16px 0 8px">💬 Comentarios</p>`;
+    if(!d.eventos.length) h+='<p class="muted">Todavía nadie ha comentado esta palabra.</p>';
+    else h+=d.eventos.map(e=>`<div style="padding:9px 0;border-top:1px dashed var(--line);font-size:.86rem">
+      <b>@${esc(e.commenter_username||"desconocido")}</b>: “${esc((e.comment_text||"").slice(0,80))}”
+      <div class="muted" style="font-size:.76rem;margin-top:2px">
+        ${ESTADOS[e.dm_status]||esc(e.dm_status)}${e.public_reply_status==="sent"?" · respondido en público":""}
+        · ${new Date(e.created_at).toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+      </div></div>`).join("");
+    document.getElementById("statsBody").innerHTML=h;
+  }catch(e){ document.getElementById("statsBody").innerHTML='<p class="muted">⚠️ '+esc(e.message)+'</p>'; }
+};
+window.descargarAudiencia=function(){
+  const s=window._stats||{}; const rows=s.emails||[];
+  if(!rows.length){ toast("Aún no hay emails que descargar"); return; }
+  const q=(v)=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const csv=["email,usuario,fecha", ...rows.map(e=>[e.email, e.username?("@"+e.username):"", e.fecha?new Date(e.fecha).toLocaleDateString("es-ES"):""].map(q).join(","))].join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="contactos-"+String(s.keyword||"automatizacion").replace(/[^a-z0-9]+/gi,"-").slice(0,30)+".csv";
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},600);
+  toast("⬇️ Descargando "+rows.length+" contactos");
+};
+window.descargarBoton=function(i){
+  const b=((window._stats||{}).botones||[])[i]; if(!b||!b.quien) return;
+  const q=(v)=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const csv=["usuario,email,clics", ...b.quien.map(p=>["@"+String(p.username||"").replace(/^@/,""), p.email||"", p.veces].map(q).join(","))].join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="clics-"+String(b.boton||"boton").replace(/[^a-z0-9]+/gi,"-").slice(0,30)+".csv";
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},600);
+  toast("⬇️ Descargando "+b.quien.length+" de «"+b.boton+"»");
+};
+window.llevarACampanas=async function(){
+  const s=window._stats||{};
+  const sug=String(s.keyword||"").split(",")[0].trim();
+  const nombre=prompt("¿Cómo quieres llamar a este segmento en Campañas?\n(Se llevarán los emails captados por esta automatización)", sug||"");
+  if(nombre===null) return;
+  if(!nombre.trim()){ toast("Ponle un nombre al segmento"); return; }
+  try{
+    const r=await apiFn("ig-a-campanas",{id:s.id, nombre:nombre.trim()});
+    toast(`✅ ${r.anadidos} en el segmento «${r.segmento}» de Campañas`+(r.ya_estaban?` · ${r.ya_estaban} ya estaban`:""));
+  }catch(e){ toast("⚠️ "+e.message); }
+};
+window.openRecorrido=async function(id){
+  document.getElementById("statsOverlay").classList.add("on");
+  document.getElementById("statsTitle").textContent="🗺️ Recorrido";
+  document.getElementById("statsChips").innerHTML="";
+  document.getElementById("statsBody").innerHTML='<p class="muted">Cargando…</p>';
+  try{
+    const d=await api("rule_stats",{id});
+    const r=d.regla||{}, f=d.funnel||{};
+    document.getElementById("statsTitle").textContent=`🗺️ Recorrido de “${d.keyword}”`;
+    const pct=(a,b)=>b?Math.round(a/b*100):0;
+    const boton=(t)=>`<span style="display:inline-block;background:#fff;border:1.5px solid #e3d9d0;border-radius:999px;padding:5px 14px;font-weight:700;margin:2px 6px 0 0">${t}</span>`;
+    const burb=(lado,contenido,titulo,stat)=>`
+      <div style="margin:16px 0 0">
+        <div class="muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;text-align:${lado==="d"?"right":"left"}">${titulo}</div>
+        <div style="display:flex;justify-content:${lado==="d"?"flex-end":"flex-start"}">
+          <div style="max-width:80%;background:${lado==="d"?"linear-gradient(135deg,#fdeef5,#fce7f0)":"#f3f1ee"};border:1px solid ${lado==="d"?"#f5cfe0":"#e6e0d8"};border-radius:${lado==="d"?"16px 16px 4px 16px":"16px 16px 16px 4px"};padding:10px 14px;font-size:.88rem;white-space:pre-wrap;line-height:1.45">${contenido}</div>
+        </div>
+        ${stat?`<div style="text-align:${lado==="d"?"right":"left"};margin-top:4px;font-size:.78rem;font-weight:800;color:#17966a">${stat}</div>`:""}
+      </div>`;
+    const flecha=(txt)=>`<div style="text-align:center;color:#b7a99a;font-size:.78rem;font-weight:700;margin:10px 0 -6px">⬇ ${txt}</div>`;
+    let h='<p class="muted" style="font-size:.8rem;margin:0">Así ve la conversación quien comenta — con lo que pasó de verdad en cada paso.</p>';
+    h+=burb("i", `💬 “${esc(d.keyword)}”`, "1 · Alguien comenta tu post", `${f.comentarios} comentarios`);
+    const pub=(r.public_replies&&r.public_replies[0])||"";
+    if(pub) h+=burb("d", esc(pub), "Tu respuesta pública en el post", `${f.publicas} enviadas`);
+    const dmTxt=(r.reply_variants&&r.reply_variants[0])||r.reply_text||"";
+    h+=burb("d", esc(dmTxt)+(r.button_text?"\n\n"+boton(esc(r.button_text)):""), "2 · Le llega tu DM", `${f.dms} enviados`);
+    let base=f.dms;
+    if(r.button_text){
+      h+=flecha(`${pct(f.clicks_unicos,f.dms)}% pulsan el botón`);
+      h+=burb("i", "👆 "+esc(r.button_text), "3 · Pulsa el botón", `${f.clicks_unicos} personas · ${f.clicks} clics`);
+      base=f.clicks_unicos;
+    }
+    if(r.require_follow) h+=burb("d", esc(r.follow_prompt||"Para poder enviártelo necesito que me sigas 😊"), "Filtro · le pides que te siga", "");
+    if(r.ask_email){
+      h+=burb("d", esc(r.email_prompt||"¡Genial! Déjame tu email y te lo envío ✍️"), "Le pides el email", "");
+      h+=flecha(`${pct(f.emails,base)}% lo dejan`);
+      h+=burb("i", "📧 su@email.com", "Deja su email", `${f.emails} emails captados${r.etiqueta?` · 🏷️ ${esc(r.etiqueta)}`:""}`);
+    }
+    const botones=[[r.link_button_text,r.link_button_url],[r.link_button2_text,r.link_button2_url],[r.link_button3_text,r.link_button3_url]].filter(b=>b[0]&&b[1]);
+    h+=burb("d",
+      (r.image_url?"🖼️ (imagen)\n":"")+(r.audio_url?"🎙️ (audio)\n":"")+esc(r.final_message||"¡Listo! Aquí tienes lo que pedías 👇")+(botones.length?"\n\n"+botones.map(b=>boton("🔗 "+esc(b[0]))).join(""):""),
+      "🎁 La entrega", `${f.entregas} entregas`);
+    document.getElementById("statsBody").innerHTML=h;
+  }catch(e){ document.getElementById("statsBody").innerHTML='<p class="muted">⚠️ '+esc(e.message)+'</p>'; }
+};
+window.closeStats=()=>document.getElementById("statsOverlay").classList.remove("on");
+document.getElementById("statsOverlay").addEventListener("click",e=>{if(e.target.id==="statsOverlay")closeStats();});
+
+async function toggleRule(id,on){try{await api("toggle_rule",{id,is_active:on});toast(on?"Activada":"Desactivada");loadRules();}catch(e){toast("⚠️ "+e.message);}}
+function dupRule(r){
+  const copia = { ...r, id: "", is_active: false };
+  openEditor(copia);
+  document.getElementById("edTitle").textContent = "⧉ Duplicar automatización";
+  document.getElementById("is_active").checked = false;
+  toast("Copia lista ✨ Cambia la palabra clave (y el post si toca) y guárdala");
+}
+async function delRule(id){if(!confirm("¿Borrar esta automatización?"))return;try{await api("delete_rule",{id});toast("Borrada");loadRules();loadMetrics();}catch(e){toast("⚠️ "+e.message);}}
+
+// ---- Editor ----
+function addMsg(val=""){
+  const d=document.createElement("div");d.className="msg";
+  d.innerHTML=`<textarea placeholder="Escribe el mensaje del DM…"></textarea><button type="button" class="ghost sm" onclick="event.stopPropagation();toggleEmojis(this,this.parentNode.querySelector('textarea'))">😊</button><button class="danger sm" onclick="this.parentNode.remove()">✕</button>`;
+  const ta=d.querySelector("textarea"); ta.value=val;
+  enterAnade(ta,"msgs",addMsg);
+  document.getElementById("msgs").appendChild(d);
+}
+function getMsgs(){return [...document.querySelectorAll("#msgs textarea")].map(t=>t.value.trim()).filter(Boolean);}
+function addPub(val=""){
+  const d=document.createElement("div");d.className="msg";
+  d.innerHTML=`<textarea placeholder="✏️ Escribe aquí la tuya — esto gris es solo un ejemplo: ¡Hecho! Te lo acabo de mandar por DM 📩"></textarea><button type="button" class="ghost sm" onclick="event.stopPropagation();toggleEmojis(this,this.parentNode.querySelector('textarea'))">😊</button><button class="danger sm" onclick="this.parentNode.remove()">✕</button>`;
+  const ta=d.querySelector("textarea"); ta.value=val;
+  enterAnade(ta,"pubs",addPub);
+  document.getElementById("pubs").appendChild(d);
+}
+
+// Enter añade otra variante y salta a ella; Shift+Enter deja escribir un salto de línea
+function enterAnade(ta, contId, addFn){
+  ta.addEventListener("keydown",(e)=>{
+    if(e.key!=="Enter"||e.shiftKey) return;
+    e.preventDefault();
+    if(!ta.value.trim()) return;
+    addFn();
+    const todas=[...document.querySelectorAll("#"+contId+" textarea")];
+    todas[todas.length-1].focus();
+  });
+}
+
+// ---- Selector de emojis ----
+const EMOJIS="😊 😉 😍 🥰 😘 😎 🤩 🥳 😂 😅 🤭 🤗 🌸 ✨ 🎁 🎉 🔥 💥 💫 ⭐ 🌟 ❤️ 🧡 💛 💚 💙 💜 🤍 💕 💖 🫶 🙌 👏 👍 🙏 💪 👉 👇 👀 ✍️ 💌 📩 📲 💬 🔔 ✅ 🎯 🚀 🏆 🎈 🌈 ☀️ 🍀 ☕ 📚 🧠 🗓️ 💃 😜 🤫 👗 👠 👜 🛍️ 👖 👚 🧥 👒 🕶️ 💍 💄 💅 🪞 🎀 🧵 👰 🤵 💐 🥂 🍾 🎊 🍽️ 🍕 🍰 🧁 🍓 🥗 🏋️ 🧘 🏃 ⚽ 🎾 🏖️ ✈️ 🗺️ 📸 🎥 🎬 🎵 🎤 💻 📱 🖥️ 💼 💰 💸 🏠 🛋️ 🪴 🐶 🐱 👶 🤰 🧸 🎨 ✂️ 📦 🔑 🛒 🏷️ 🤑".split(" ");
+let emojiTarget=null;
+function pintarEmojis(){
+  const p=document.getElementById("emojiPanel");
+  if(p.dataset.listo) return;
+  p.innerHTML=EMOJIS.map(e=>`<button type="button" style="background:none;border:none;font-size:21px;cursor:pointer;padding:3px;border-radius:8px" onmouseover="this.style.background='#fdf0f6'" onmouseout="this.style.background='none'" onclick="event.stopPropagation();insertarEmoji('${e}')">${e}</button>`).join("");
+  p.dataset.listo="1";
+}
+function toggleEmojis(btn, target){
+  const p=document.getElementById("emojiPanel");
+  pintarEmojis();
+  if(p.style.display==="block"&&emojiTarget===target){p.style.display="none";emojiTarget=null;return;}
+  emojiTarget=target;
+  const r=btn.getBoundingClientRect();
+  p.style.display="block";
+  p.style.top=(r.bottom+window.scrollY+6)+"px";
+  p.style.left=Math.max(8, Math.min(r.left+window.scrollX-120, window.innerWidth-292))+"px";
+}
+function insertarEmoji(e){
+  if(!emojiTarget) return;
+  const t=emojiTarget;
+  const s=t.selectionStart??t.value.length, f=t.selectionEnd??t.value.length;
+  t.value=t.value.slice(0,s)+e+t.value.slice(f);
+  t.selectionStart=t.selectionEnd=s+e.length;
+  t.focus();
+}
+document.addEventListener("click",(ev)=>{
+  const p=document.getElementById("emojiPanel");
+  if(p.style.display!=="block") return;
+  if(ev.target.closest("#emojiPanel")) return;
+  p.style.display="none"; emojiTarget=null;
+});
+// Botón de emoji flotante en los campos fijos del editor
+["email_prompt","final_message","button_text","keyword","follow_prompt","link_button_text"].forEach((id)=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  const w=document.createElement("div");
+  w.style.cssText="position:relative";
+  el.parentNode.insertBefore(w,el); w.appendChild(el);
+  el.style.paddingRight="36px";
+  const b=document.createElement("button");
+  b.type="button"; b.textContent="😊";
+  b.style.cssText="position:absolute;right:6px;top:6px;background:none;border:none;cursor:pointer;font-size:17px;opacity:.75;padding:2px";
+  b.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();toggleEmojis(b,el);};
+  w.appendChild(b);
+});
+function getPubs(){return [...document.querySelectorAll("#pubs textarea")].map(t=>t.value.trim()).filter(Boolean);}
+let AI_PDF=null;
+window.cogerAiPdf=async function(inp){
+  const f=inp.files[0]; if(!f) return; inp.value="";
+  const chip=document.getElementById("aiPdfChip");
+  if(f.size>20*1024*1024){ chip.textContent="⚠️ El PDF no puede pasar de 20 MB"; return; }
+  chip.textContent="Leyendo el PDF… ⏳";
+  try{
+    const b64=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(f); });
+    AI_PDF={nombre:f.name, data:b64};
+    chip.innerHTML=`📎 <b>${esc(f.name)}</b> listo — la IA lo leerá al generar <a href="#" onclick="AI_PDF=null;document.getElementById('aiPdfChip').textContent='Adjunto quitado';return false" style="color:#c0392b;font-weight:800;text-decoration:none">✕</a>`;
+  }catch(e){ AI_PDF=null; chip.textContent="⚠️ No he podido leer ese PDF"; }
+};
+window.generarConIA=async function(){
+  const brief=document.getElementById("aiBrief").value.trim();
+  const msg=document.getElementById("aiMsg"), btn=document.getElementById("aiBtn");
+  if(!brief && !AI_PDF){ msg.textContent="Cuéntame algo o adjunta tu lead magnet 🙂"; return; }
+  const orig=btn.textContent; btn.disabled=true; btn.textContent=AI_PDF?"Leyendo tu PDF… 📖":"Pensando… ✨"; msg.textContent="";
+  try{
+    const {sugerencias:s}=await api("ai_copy",{brief, keyword:document.getElementById("keyword").value.trim(), pdf: AI_PDF?AI_PDF.data:undefined});
+    if(Array.isArray(s.respuestas_publicas)&&s.respuestas_publicas.length){
+      document.getElementById("pubs").innerHTML=""; s.respuestas_publicas.forEach(t=>addPub(String(t)));
+    }
+    if(Array.isArray(s.mensajes_dm)&&s.mensajes_dm.length){
+      // los enlaces van SOLO en la entrega: fuera variantes con URL o el marcador TU_ENLACE
+      const limpias = s.mensajes_dm.map(t=>String(t)).filter(t=>!/TU_ENLACE|https?:\/\//i.test(t));
+      if(limpias.length){ document.getElementById("msgs").innerHTML=""; limpias.forEach(t=>addMsg(t)); }
+    }
+    if(s.texto_boton) document.getElementById("button_text").value=String(s.texto_boton).slice(0,20);
+    if(s.mensaje_email){ document.getElementById("ask_email").checked=true; document.getElementById("email_prompt").value=String(s.mensaje_email); }
+    if(s.mensaje_entrega) document.getElementById("final_message").value=String(s.mensaje_entrega).replace(/TU_ENLACE/g,"https://tu-enlace.com");
+    syncEmail(); renderPreview();
+    msg.innerHTML="¡Listo! 👀 Míralo en la vista previa y ajústalo a tu gusto.";
+  }catch(e){ msg.textContent="⚠️ "+(e.message||"no ha salido, prueba otra vez"); }
+  finally{ btn.disabled=false; btn.textContent=orig; }
+};
+
+function renderPreview(){
+  const box=document.getElementById("prevBox"); if(!box) return;
+  const kw=(document.getElementById("keyword").value.split(",")[0]||"").trim()||"TU PALABRA";
+  const pubsArr=(typeof getPubs==="function"?getPubs():[]);
+  const pub=pubsArr[0];
+  const pe=document.getElementById("pubEstado");
+  if(pe){
+    if(pubsArr.length){ pe.style.color="#0f6b4c"; pe.textContent=`✅ Se responderá en público (${pubsArr.length===1?"1 variante":pubsArr.length+" variantes"})`; }
+    else { pe.style.color="#b3541e"; pe.textContent="🔕 Ahora mismo NO se responde en público: el texto gris es solo un ejemplo. Escribe el tuyo si quieres respuesta pública."; }
+  }
+  const dm=(typeof getMsgs==="function"?getMsgs():[])[0]||"Tu primer mensaje del DM…";
+  const btn=document.getElementById("button_text").value.trim();
+  const ask=document.getElementById("ask_email").checked;
+  const ep=document.getElementById("email_prompt").value.trim()||"¡Genial! Déjame tu email y te lo envío ✍️";
+  const fm=document.getElementById("final_message").value.trim()||"¡Aquí lo tienes! 👉 tu-enlace.com";
+  let h=`<div class="pv-sec">En tu post</div>
+  <div class="pv-com">💬 <b>maria_84</b>: “${esc(kw)}”</div>`;
+  if(pub) h+=`<div class="pv-rep">↩️ <b>tú</b> respondes en público: ${esc(pub)}</div>`;
+  h+=`<div class="pv-sec">En sus mensajes privados</div><div class="pv-out">${esc(dm)}</div>`;
+  const follow=document.getElementById("require_follow").checked;
+  const fp=document.getElementById("follow_prompt").value.trim()||"Para poder enviártelo necesito que me sigas 😊 Sígueme y vuelve a darle al botón 👇";
+  if(btn){
+    h+=`<div style="align-self:flex-start"><span class="pv-btn">${esc(btn)}</span></div>`;
+    h+=`<div class="pv-accion">— maria_84 pulsa el botón 👆 —</div>`;
+    const cimg=document.getElementById("click_image_url").value.trim();
+    if(cimg) h+=`<div class="pv-out" style="padding:6px"><img src="${esc(cimg)}" style="max-width:150px;border-radius:10px;display:block" alt="imagen tras el clic"></div>`;
+    if(follow){
+      h+=`<div class="pv-cond">
+        <div class="pv-cond-t">🫶 Solo si aún no te sigue (si ya te sigue, este paso se salta solo)</div>
+        <div class="pv-out">${esc(fp)}</div>
+        <div style="align-self:flex-start"><span class="pv-btn">¡Ya te sigo! 🫶</span></div>
+        <div class="pv-accion">— te sigue y pulsa «¡Ya te sigo!» 👆 —</div>
+      </div>`;
+    }
+    if(ask){
+      h+=`<div class="pv-out">${esc(ep)}</div><div class="pv-in">maria@email.com</div>`;
+      h+=`<div class="pv-ml">📥 Su email → tu histórico${ML_CONNECTED?" + MailerLite":""}</div>`;
+    }
+    const img=document.getElementById("image_url").value.trim();
+    const aud=document.getElementById("audio_url").value.trim();
+    if(img) h+=`<div class="pv-out" style="padding:6px"><img src="${esc(img)}" style="max-width:150px;border-radius:10px;display:block" alt="imagen de entrega"></div>`;
+    if(aud) h+=`<div class="pv-out">🎙️ <i>tu nota de voz</i> ▶️</div>`;
+    h+=`<div class="pv-out">${esc(fm)}</div>`;
+    const lbt=document.getElementById("link_button_text").value.trim(), lbu=document.getElementById("link_button_url").value.trim();
+    const lbt2=document.getElementById("link_button2_text").value.trim(), lbu2=document.getElementById("link_button2_url").value.trim();
+    const lbt3=document.getElementById("link_button3_text").value.trim(), lbu3=document.getElementById("link_button3_url").value.trim();
+    if(lbt&&lbu) h+=`<div style="align-self:flex-start"><span class="pv-btn" style="border-color:#17966a;color:#0f6b4c">🔗 ${esc(lbt)}</span></div>`;
+    if(lbt2&&lbu2) h+=`<div style="align-self:flex-start;margin-top:4px"><span class="pv-btn" style="border-color:#17966a;color:#0f6b4c">🔗 ${esc(lbt2)}</span></div>`;
+    if(lbt3&&lbu3) h+=`<div style="align-self:flex-start;margin-top:4px"><span class="pv-btn" style="border-color:#17966a;color:#0f6b4c">🔗 ${esc(lbt3)}</span></div>`;
+  } else {
+    h+=`<div class="pv-sec" style="color:var(--rosa-d)">Sin botón: el recorrido termina en este mensaje</div>`;
+  }
+  box.innerHTML=h;
+}
+document.getElementById("overlay").addEventListener("input", renderPreview);
+document.getElementById("overlay").addEventListener("change", renderPreview);
+
+function syncEmail(){
+  const hasBtn=document.getElementById("button_text").value.trim().length>0;
+  const ask=document.getElementById("ask_email").checked;
+  document.getElementById("btnFields").classList.toggle("hide",!hasBtn);
+  document.getElementById("btnHint").style.display=hasBtn?"none":"block";
+  document.getElementById("emailFields").classList.toggle("hide",!(hasBtn&&ask));
+  const mlWrap=document.getElementById("mlGroupWrap"), emailDest=document.getElementById("emailDest");
+  if(mlWrap&&emailDest){
+    if(ML_CONNECTED){
+      mlWrap.style.display="";
+      emailDest.innerHTML='📥 Los emails se guardan en tu <b>histórico</b> (los ves en «📊 Estadísticas») y además entran en tu <b>MailerLite</b>.';
+    }else{
+      mlWrap.style.display="none";
+      emailDest.innerHTML='📥 Los emails se guardan en tu <b>histórico</b> (los ves en «📊 Estadísticas»). ¿Quieres que además entren en una lista de correo? Conecta MailerLite arriba, junto a tu cuenta.';
+    }
+  }
+  const follow=document.getElementById("require_follow").checked;
+  document.getElementById("followFields").classList.toggle("hide",!(hasBtn&&follow));
+  document.getElementById("finalLabel").innerHTML=ask
+    ?'2º · Mensaje de entrega <span class="muted">(cuando ya te ha dado su email — aquí va tu enlace o recurso)</span>'
+    :'Mensaje al pulsar el botón <span class="muted">(aquí va tu enlace o recurso)</span>';
+  document.getElementById("flujoNota").textContent=ask
+    ?"Míralo en la vista previa: comenta → DM con botón → email → entrega con tu enlace."
+    :"⚠️ Si quieres captar su email, marca la casilla de arriba y pon el enlace en el mensaje de entrega, no en el DM inicial.";
+  renderPreview();
+}
+function fillGroups(sel=""){
+  const s=document.getElementById("mailerlite_group_id");
+  s.innerHTML='<option value="">— Sin grupo (lista general) —</option>'+ML_GROUPS.map(g=>`<option value="${g.id}" ${g.id===sel?"selected":""}>${esc(g.name)}</option>`).join("");
+}
+function openEditor(r){
+  _restaurando=true;
+  document.getElementById("overlay").classList.add("on");
+  document.getElementById("msgs").innerHTML="";
+  document.getElementById("pubs").innerHTML="";
+  fillGroups(r?.mailerlite_group_id||"");
+  const cw=document.getElementById("cuentaWrap"), cs=document.getElementById("rule_account");
+  if(CUENTAS.length>1){
+    cw.classList.remove("hide");
+    cs.innerHTML=CUENTAS.map(a=>`<option value="${a.ig_user_id}">@${esc(a.username||a.ig_user_id)}</option>`).join("");
+    cs.value=(r&&r.ig_user_id)?String(r.ig_user_id):(PREF_CUENTA||String(CUENTAS[0].ig_user_id));
+    cs.disabled=!!(r&&r.id);
+    MEDIA=[]; MEDIA_AFTER=null;
+  } else { cw.classList.add("hide"); }
+  if(r){
+    document.getElementById("edTitle").textContent="✏️ Editar automatización";
+    document.getElementById("rid").value=r.id;
+    document.getElementById("keyword").value=r.keyword;
+    document.getElementById("match_type").value=r.match_type;
+    document.getElementById("media_id").value=r.media_id||"";
+    document.getElementById("next_after").value=_aLocalInput(r.next_after);
+    document.getElementById("image_url").value=r.image_url||"";
+    document.getElementById("audio_url").value=r.audio_url||"";
+    document.getElementById("click_image_url").value=r.click_image_url||"";
+    pintarAdjuntos();
+    document.getElementById("button_text").value=r.button_text||"";
+    document.getElementById("ask_email").checked=!!r.ask_email;
+    document.getElementById("require_follow").checked=!!r.require_follow;
+    document.getElementById("en_historias").checked=!!r.en_historias;
+    document.getElementById("follow_prompt").value=r.follow_prompt||"";
+    document.getElementById("email_prompt").value=r.email_prompt||"";
+    document.getElementById("rule_etiqueta").value=r.etiqueta||"";
+    document.getElementById("final_message").value=r.final_message||"";
+    document.getElementById("link_button_text").value=r.link_button_text||"";
+    document.getElementById("link_button_url").value=r.link_button_url||"";
+    document.getElementById("link_button2_text").value=r.link_button2_text||"";
+    document.getElementById("link_button2_url").value=r.link_button2_url||"";
+    document.getElementById("link_button3_text").value=r.link_button3_text||"";
+    document.getElementById("link_button3_url").value=r.link_button3_url||"";
+    document.getElementById("linkFields").classList.toggle("hide", !(r.link_button_text||r.link_button_url||r.link_button2_text||r.link_button2_url||r.link_button3_text||r.link_button3_url));
+    marcarBloqueLink();
+    document.getElementById("is_active").checked=r.is_active;
+    const vs=(r.reply_variants&&r.reply_variants.length)?r.reply_variants:[r.reply_text||""];
+    vs.forEach(addMsg);
+    (r.public_replies&&r.public_replies.length?r.public_replies:[""]).forEach(addPub);
+  }else{
+    document.getElementById("edTitle").textContent="➕ Nueva automatización";
+    ["rid","keyword","media_id","image_url","audio_url","click_image_url","button_text","email_prompt","final_message","link_button_text","link_button_url","link_button2_text","link_button2_url","link_button3_text","link_button3_url","rule_etiqueta","next_after"].forEach(i=>document.getElementById(i).value="");
+    document.getElementById("linkFields").classList.add("hide");
+    pintarAdjuntos();
+    document.getElementById("match_type").value="contains";
+    document.getElementById("ask_email").checked=false;
+    document.getElementById("require_follow").checked=false;
+    document.getElementById("en_historias").checked=false;
+    document.getElementById("follow_prompt").value="";
+    document.getElementById("is_active").checked=true;
+    addMsg();
+    addPub();
+    // 🧠 Precarga tus últimos textos guardados (comodísimo para migrar varias automatizaciones parecidas)
+    try{
+      const last=JSON.parse(localStorage.getItem("ig_last_texts")||"null");
+      if(last){
+        ["button_text","follow_prompt","email_prompt","final_message","link_button_text","link_button_url","link_button2_text","link_button2_url"].forEach(k=>{ if(last[k]) document.getElementById(k).value=last[k]; });
+        if(last.ask_email) document.getElementById("ask_email").checked=true;
+        if(last.require_follow) document.getElementById("require_follow").checked=true;
+        document.getElementById("linkFields").classList.toggle("hide", !(last.link_button_text||last.link_button_url||last.link_button2_text||last.link_button2_url));
+        if(Array.isArray(last.msgs)&&last.msgs.length){ document.getElementById("msgs").innerHTML=""; last.msgs.forEach(addMsg); }
+        if(Array.isArray(last.pubs)&&last.pubs.length){ document.getElementById("pubs").innerHTML=""; last.pubs.forEach(addPub); }
+      }
+    }catch(e){}
+    marcarBloqueLink();
+  }
+  // 💾 recuperar lo que estabas montando y no llegaste a guardar (mismo destino: nueva o esta misma regla)
+  try{
+    const b=JSON.parse(localStorage.getItem(BORRADOR_KEY)||"null");
+    const ridActual=(r&&r.id)?String(r.id):"";
+    if(b && String(b.rid||"")===ridActual){
+      const hayAlgo=(b.keyword&&b.keyword.trim())||(b.msgs||[]).some(x=>x&&x.trim())||(b.pubs||[]).some(x=>x&&x.trim());
+      if(hayAlgo){ _aplicarBorrador(b); toast("💾 He recuperado lo que estabas montando sin guardar"); }
+    }
+  }catch(e){}
+  const mid=document.getElementById("media_id").value;
+  document.getElementById("post_scope").value=mid===""?"all":(mid==="NEXT"?"next":(mid==="STORIES"?"story":(mid.startsWith("STORY:")?"onestory":"one")));
+  onScope();
+  syncEmail();
+  renderPreview();
+  _restaurando=false;
+}
+function closeEditor(){document.getElementById("overlay").classList.remove("on");}
+
+// ---- Autoguardado local (aunque no le des a Guardar no se pierde) ----
+const BORRADOR_KEY="ig_borrador";
+function _snapEditor(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value:"";};
+  return {
+    rid:g("rid"), keyword:g("keyword"), match_type:g("match_type"), media_id:g("media_id"), next_after:g("next_after"),
+    image_url:g("image_url"), audio_url:g("audio_url"), click_image_url:g("click_image_url"),
+    button_text:g("button_text"),
+    ask_email:document.getElementById("ask_email")?.checked||false,
+    require_follow:document.getElementById("require_follow")?.checked||false,
+    en_historias:document.getElementById("en_historias")?.checked||false,
+    follow_prompt:g("follow_prompt"), email_prompt:g("email_prompt"), etiqueta:g("rule_etiqueta"),
+    final_message:g("final_message"),
+    link_button_text:g("link_button_text"), link_button_url:g("link_button_url"),
+    link_button2_text:g("link_button2_text"), link_button2_url:g("link_button2_url"),
+    link_button3_text:g("link_button3_text"), link_button3_url:g("link_button3_url"),
+    mailerlite_group_id:g("mailerlite_group_id"),
+    is_active:document.getElementById("is_active")?.checked!==false,
+    msgs:(typeof getMsgs==="function")?getMsgs():[], pubs:(typeof getPubs==="function")?getPubs():[],
+    ts:Date.now(),
+  };
+}
+let _autosaveT=null, _restaurando=false;
+function autoguardarBorrador(){
+  if(_restaurando) return;
+  if(!document.getElementById("overlay").classList.contains("on")) return;
+  clearTimeout(_autosaveT);
+  _autosaveT=setTimeout(()=>{
+    const s=_snapEditor();
+    const hayAlgo=(s.keyword&&s.keyword.trim())||(s.msgs||[]).some(x=>x&&x.trim())||(s.pubs||[]).some(x=>x&&x.trim());
+    if(!hayAlgo){ try{localStorage.removeItem(BORRADOR_KEY);}catch(e){} return; }
+    try{ localStorage.setItem(BORRADOR_KEY, JSON.stringify(s)); }catch(e){}
+    const av=document.getElementById("autosaveHint"); if(av){ av.textContent="💾 guardado automáticamente"; }
+  },500);
+}
+function limpiarBorrador(){ try{localStorage.removeItem(BORRADOR_KEY);}catch(e){} }
+function _aplicarBorrador(s){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||"";};
+  set("rid",s.rid); set("keyword",s.keyword); set("match_type",s.match_type||"contains");
+  set("media_id",s.media_id); set("next_after",s.next_after); set("image_url",s.image_url); set("audio_url",s.audio_url);
+  set("click_image_url",s.click_image_url); set("button_text",s.button_text);
+  if(document.getElementById("ask_email")) document.getElementById("ask_email").checked=!!s.ask_email;
+  if(document.getElementById("require_follow")) document.getElementById("require_follow").checked=!!s.require_follow;
+  if(document.getElementById("en_historias")) document.getElementById("en_historias").checked=!!s.en_historias;
+  set("follow_prompt",s.follow_prompt); set("email_prompt",s.email_prompt); set("rule_etiqueta",s.etiqueta);
+  set("final_message",s.final_message);
+  set("link_button_text",s.link_button_text); set("link_button_url",s.link_button_url);
+  set("link_button2_text",s.link_button2_text); set("link_button2_url",s.link_button2_url);
+  set("link_button3_text",s.link_button3_text); set("link_button3_url",s.link_button3_url);
+  if(document.getElementById("is_active")) document.getElementById("is_active").checked=s.is_active!==false;
+  const tieneLink=!!(s.link_button_text||s.link_button_url||s.link_button2_text||s.link_button2_url||s.link_button3_text||s.link_button3_url);
+  document.getElementById("linkFields").classList.toggle("hide", !tieneLink);
+  document.getElementById("msgs").innerHTML=""; (s.msgs&&s.msgs.length?s.msgs:[""]).forEach(addMsg);
+  document.getElementById("pubs").innerHTML=""; (s.pubs&&s.pubs.length?s.pubs:[""]).forEach(addPub);
+  if(typeof marcarBloqueLink==="function") marcarBloqueLink();
+  pintarAdjuntos();
+}
+// un único listener delegado en el editor: cualquier cambio dispara el autoguardado
+document.addEventListener("DOMContentLoaded",()=>{
+  const ov=document.getElementById("overlay");
+  if(ov){ ov.addEventListener("input",autoguardarBorrador); ov.addEventListener("change",autoguardarBorrador); }
+});
+
+let GUARDANDO=false;
+async function saveRule(){
+  if(GUARDANDO) return;           // 🛡️ anti doble clic: una regla por pulsación
+  const _scope=document.getElementById("post_scope").value;
+  if((_scope==="link"||_scope==="one") && !document.getElementById("media_id").value){
+    toast(_scope==="link" ? "Pega el enlace del reel y dale a 🔎 Buscar antes de guardar" : "Toca el post en la lista antes de guardar");
+    return;
+  }
+  GUARDANDO=true;
+  const btnG=[...document.querySelectorAll('button')].find(b=>b.getAttribute('onclick')==='saveRule()');
+  if(btnG){ btnG.disabled=true; btnG.textContent='Guardando…'; }
+  const rule={
+    id:document.getElementById("rid").value||null,
+    keyword:document.getElementById("keyword").value,
+    match_type:document.getElementById("match_type").value,
+    reply_variants:getMsgs(),
+    public_replies:getPubs(),
+    image_url:document.getElementById("image_url").value,
+    audio_url:document.getElementById("audio_url").value,
+    click_image_url:document.getElementById("click_image_url").value,
+    media_id:document.getElementById("media_id").value,
+    next_after:_aISO(document.getElementById("next_after").value),
+    button_text:document.getElementById("button_text").value,
+    ask_email:document.getElementById("ask_email").checked,
+    require_follow:document.getElementById("require_follow").checked,
+    en_historias:document.getElementById("en_historias").checked,
+    follow_prompt:document.getElementById("follow_prompt").value,
+    email_prompt:document.getElementById("email_prompt").value,
+    etiqueta:document.getElementById("rule_etiqueta").value,
+    final_message:document.getElementById("final_message").value,
+    link_button_text:document.getElementById("link_button_text").value,
+    link_button_url:document.getElementById("link_button_url").value,
+    link_button2_text:document.getElementById("link_button2_text").value,
+    link_button2_url:document.getElementById("link_button2_url").value,
+    link_button3_text:document.getElementById("link_button3_text").value,
+    link_button3_url:document.getElementById("link_button3_url").value,
+    mailerlite_group_id:document.getElementById("mailerlite_group_id").value,
+    is_active:document.getElementById("is_active").checked,
+    ig_user_id:cuentaRegla(),
+  };
+  try{
+    const guardada=await api("upsert_rule",{rule});
+    // ig-admin pone la fecha del próximo post a "ahora"; si has elegido otra, se la fijamos aquí.
+    if(rule.media_id==="NEXT" && rule.next_after && guardada?.rule?.id){
+      try{ await apiFn("ig-next-after",{id:guardada.rule.id, next_after:rule.next_after}); }
+      catch(e){ toast("⚠️ Guardada, pero no he podido fijar la fecha — vuelve a entrar y dale a Guardar"); }
+    }
+    try{ localStorage.setItem("ig_last_texts", JSON.stringify({button_text:rule.button_text,follow_prompt:rule.follow_prompt,email_prompt:rule.email_prompt,final_message:rule.final_message,link_button_text:rule.link_button_text,link_button_url:rule.link_button_url,link_button2_text:rule.link_button2_text,link_button2_url:rule.link_button2_url,ask_email:rule.ask_email,require_follow:rule.require_follow,msgs:rule.reply_variants,pubs:rule.public_replies})); }catch(e){}
+    limpiarBorrador();
+    toast("Guardada ✅");closeEditor();loadRules();loadMetrics();
+  }
+  catch(e){toast("⚠️ "+e.message);}
+  finally{ GUARDANDO=false; if(btnG){ btnG.disabled=false; btnG.textContent='Guardar'; } }
+}
+
+// ---- Contactos ----
+async function loadContacts(){
+  try{
+    const {contacts}=await api("list_contacts");
+    CONTACTS=contacts;
+    const el=document.getElementById("contactsBox");
+    if(!contacts.length){el.innerHTML='<p class="muted">Aún no hay contactos.</p>';return;}
+    el.innerHTML=`<h2>👥 ${contacts.length} contactos <button class="btn-v sm" onclick="exportContacts()" style="float:right">⬇️ Descargar Excel</button></h2><table><thead><tr><th>Usuario</th><th>Email</th><th>Interacciones</th><th>Última vez</th></tr></thead><tbody>${
+      contacts.map(c=>`<tr><td>@${esc(c.username||"—")}</td><td>${esc(c.email||"—")}</td><td>${c.interactions}</td><td>${new Date(c.last_seen).toLocaleString("es-ES")}</td></tr>`).join("")
+    }</tbody></table>`;
+  }catch(e){toast("⚠️ "+e.message);}
+}
+
+// ---- Historial ----
+async function loadEvents(){
+  try{
+    const {events}=await api("list_events");
+    EVENTS=events;
+    if(!MEDIA.length){ try{ const d=await api("list_media"); MEDIA=d.media||[]; MEDIA_AFTER=d.after||null; }catch(e){} }
+    const el=document.getElementById("eventsBox");
+    if(!events.length){el.innerHTML='<p class="muted">Todavía no hay actividad.</p>';return;}
+    const postCell=(e)=>{
+      if(e.origen==="story") return '<span title="Respondió a una de tus stories">📖 story</span>';
+      const m=MEDIA.find(x=>x.id===e.media_id);
+      if(!m) return e.media_id?`<span class="muted" title="${esc(e.media_id)}">post antiguo</span>`:'<span class="muted">—</span>';
+      const img=m.thumb?`<img src="${esc(m.thumb)}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;vertical-align:middle">`:"🖼️";
+      return m.permalink?`<a href="${esc(m.permalink)}" target="_blank" rel="noopener" title="${esc(m.caption)}">${img}</a>`:`<span title="${esc(m.caption)}">${img}</span>`;
+    };
+    el.innerHTML=`<h2>🕑 Últimos eventos <button class="btn-v sm" onclick="exportEvents()" style="float:right">⬇️ Descargar Excel</button></h2><table><thead><tr><th>Cuándo</th><th>Post</th><th>Comentó</th><th>Texto</th><th>Automatización</th><th>Estado</th></tr></thead><tbody>${
+      events.map(e=>`<tr><td>${new Date(e.created_at).toLocaleString("es-ES")}</td><td>${postCell(e)}</td><td>@${esc(e.commenter_username||"—")}</td><td>${esc(e.comment_text||"")}</td><td>${e.automation?`<span class="chip">${esc(e.automation)}</span>`:'<span class="muted">—</span>'}</td><td><span class="badge b-${e.dm_status}">${lbl(e.dm_status)}</span></td></tr>`).join("")
+    }</tbody></table>`;
+  }catch(e){toast("⚠️ "+e.message);}
+}
+function lbl(s){return {sent:"enviado",skipped:"ignorado",error:"error",pending:"pendiente",duplicate:"repetido",throttled:"límite/hora"}[s]||s;}
+
+// ---------- 💬 Preguntas frecuentes ----------
+let FAQS=[];
+async function loadFaqs(){
+  try{
+    const {faqs}=await api("list_faqs");
+    FAQS=faqs||[];
+    const el=document.getElementById("faqsBox");
+    if(!FAQS.length){ el.innerHTML='<p class="muted">Aún no tienes preguntas frecuentes. Crea la primera — piensa en lo que más te preguntan por DM. 💬</p>'; return; }
+    el.innerHTML=FAQS.map((f,fi)=>`
+      <div class="card" style="margin-bottom:10px;${f.is_active?"":"opacity:.55"}">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <b>${f.en_menu?"⭐ ":""}${esc(f.pregunta)}</b>
+          ${CUENTAS.length>1?`<span class="chip" style="background:#fdf0f6;color:#c93672">📷 ${esc(nombreCuenta(f.ig_user_id))}</span>`:""}
+          ${f.is_active?'<span class="chip" style="background:#e9f7f1;color:#0f6b4c">activa</span>':'<span class="chip">pausada</span>'}
+          <span class="chip">💬 ${f.hits||0} respondida${(f.hits||0)===1?"":"s"}</span>
+        </div>
+        <p class="muted" style="margin:6px 0 4px;font-size:.8rem">Dispara con: ${esc(f.keywords)}</p>
+        <p style="font-size:.88rem;white-space:pre-wrap">${esc(f.respuesta)}</p>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          ${f.link_button_text?`<span class="chip">🔗 ${esc(f.link_button_text)}</span>`:""}
+          ${f.image_url?'<span class="chip">🖼️ imagen</span>':""}
+          <span style="margin-left:auto;display:flex;gap:6px">
+            <button class="ghost sm" onclick="openFaqEditor(${fi})">✏️ Editar</button>
+            <button class="ghost sm" onclick="toggleFaq('${f.id}',${f.is_active?"false":"true"})">${f.is_active?"⏸️ Pausar":"▶️ Activar"}</button>
+            <button class="danger sm" onclick="delFaq('${f.id}')">Borrar</button>
+          </span>
+        </div>
+      </div>`).join("");
+  }catch(e){ toast("⚠️ "+e.message); }
+}
+window.openFaqEditor=(idx)=>{
+  const f=(typeof idx==="number")?FAQS[idx]:null;
+  document.getElementById("faqTitle").textContent=f?"✏️ Editar pregunta frecuente":"➕ Nueva pregunta frecuente";
+  document.getElementById("fqId").value=f?.id||"";
+  document.getElementById("fqPregunta").value=f?.pregunta||"";
+  document.getElementById("fqKeywords").value=f?.keywords||"";
+  document.getElementById("fqRespuesta").value=f?.respuesta||"";
+  document.getElementById("fqBtnTxt").value=f?.link_button_text||"";
+  document.getElementById("fqBtnUrl").value=f?.link_button_url||"";
+  document.getElementById("fqImgUrl").value=f?.image_url||"";
+  document.getElementById("fqImgChip").textContent=f?.image_url?"🖼️ imagen puesta (sube otra para cambiarla)":"Sin imagen";
+  document.getElementById("fqMenu").checked=!!f?.en_menu;
+  document.getElementById("fqActiva").checked=f?f.is_active:true;
+  const fw=document.getElementById("fqCuentaWrap"), fs=document.getElementById("fqCuenta");
+  if(CUENTAS.length>1){
+    fw.classList.remove("hide");
+    fs.innerHTML=CUENTAS.map(a=>`<option value="${a.ig_user_id}">@${esc(a.username||a.ig_user_id)}</option>`).join("");
+    fs.value=(f&&f.ig_user_id)?String(f.ig_user_id):String(CUENTAS[0].ig_user_id);
+    fs.disabled=!!f;
+  } else { fw.classList.add("hide"); }
+  document.getElementById("faqOverlay").classList.add("on");
+};
+window.closeFaqEditor=()=>document.getElementById("faqOverlay").classList.remove("on");
+window.subirFaqImg=async(inp)=>{
+  const f=inp.files[0]; if(!f) return; inp.value="";
+  if(f.size>8*1024*1024) return alert("La imagen no puede pasar de 8 MB");
+  document.getElementById("fqImgChip").textContent="Subiendo… ⏳";
+  try{
+    const b64=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(f); });
+    const d=await api("upload_media",{kind:"image",filename:f.name,data:b64});
+    document.getElementById("fqImgUrl").value=d.url;
+    document.getElementById("fqImgChip").textContent="🖼️ imagen lista ✓";
+  }catch(e){ alert("⚠️ "+(e.message||e)); document.getElementById("fqImgChip").textContent="Sin imagen"; }
+};
+window.saveFaq=async()=>{
+  const faq={
+    id:document.getElementById("fqId").value||null,
+    pregunta:document.getElementById("fqPregunta").value,
+    keywords:document.getElementById("fqKeywords").value,
+    respuesta:document.getElementById("fqRespuesta").value,
+    link_button_text:document.getElementById("fqBtnTxt").value,
+    link_button_url:document.getElementById("fqBtnUrl").value,
+    image_url:document.getElementById("fqImgUrl").value,
+    en_menu:document.getElementById("fqMenu").checked,
+    is_active:document.getElementById("fqActiva").checked,
+    ig_user_id:(CUENTAS.length>1?document.getElementById("fqCuenta").value:(CUENTAS[0]?.ig_user_id||"")),
+  };
+  try{
+    const d=await api("upsert_faq",{faq});
+    toast(d.menu&&d.menu.ok===false?"Guardada ✅ (el menú del chat no se pudo actualizar, las palabras siguen funcionando)":"Guardada ✅ · menú del chat al día");
+    closeFaqEditor(); loadFaqs();
+  }catch(e){ toast("⚠️ "+e.message); }
+};
+window.toggleFaq=async(id,on)=>{ try{ await api("toggle_faq",{id,is_active:on==="true"||on===true}); loadFaqs(); }catch(e){ toast("⚠️ "+e.message); } };
+window.delFaq=async(id)=>{ if(!confirm("¿Borrar esta pregunta frecuente?")) return; try{ await api("delete_faq",{id}); toast("Borrada"); loadFaqs(); }catch(e){ toast("⚠️ "+e.message); } };
+
+async function loadAccounts(){
+  try{
+    const {accounts}=await api("list_accounts");
+    CUENTAS=accounts||[];
+    const name=document.getElementById("acctName"), sub=document.getElementById("acctSub");
+    const dot=document.querySelector("#acctCard .dot");
+    if(!accounts||!accounts.length){
+      name.textContent="Sin cuenta conectada";
+      sub.textContent="Pulsa «Conectar Instagram» para empezar";
+      dot.classList.add("warn");
+      return;
+    }
+    const a=accounts[0];
+    const diasTok=accounts.filter(x=>x.token_expires_at).map(x=>Math.round((new Date(x.token_expires_at)-Date.now())/86400000));
+    const days=diasTok.length?Math.min(...diasTok):null;
+    if(accounts.length>1){
+      name.textContent=accounts.map(x=>"@"+(x.username||x.ig_user_id)).join(" · ");
+      sub.textContent=`${accounts.length} cuentas conectadas · tokens válidos (se renuevan solos) · elige la cuenta al crear cada automatización`;
+    } else {
+      name.textContent="@"+(a.username||a.ig_user_id);
+      sub.textContent=`Conectada · ${days===null?"token activo":"token válido "+days+" días"} (se renueva solo) · MailerLite: ${a.has_mailerlite?"conectado ✓":"sin conectar"}`;
+    }
+    dot.classList.toggle("warn",days<10);
+    const mlBtn=document.getElementById("mlBtn");
+    if(mlBtn) mlBtn.textContent=a.has_mailerlite?"📧 MailerLite ✓":"📧 Conectar MailerLite";
+
+  }catch(e){}
+}
+async function connectML(){
+  const key=prompt("Pega tu API key de MailerLite\n(MailerLite → tu perfil → Integrations → API → Generate new token):");
+  if(!key||!key.trim())return;
+  try{await api("set_mailerlite_key",{key:key.trim()});toast("MailerLite conectado ✅");ML_GROUPS=[];const g=await api("mailerlite_groups").catch(()=>({groups:[]}));ML_GROUPS=g.groups||[];loadAccounts();}
+  catch(e){toast("⚠️ "+e.message);}
+}
+
+// Aviso al volver del OAuth (?connected= / ?connect_error=)
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.get("connected")){toast("✅ Cuenta @"+p.get("connected")+" conectada");history.replaceState(null,"",location.pathname);}
+  if(p.get("connect_error")){toast("⚠️ Error al conectar: "+p.get("connect_error"));history.replaceState(null,"",location.pathname);}
+})();
+
+if(PASS){document.getElementById("pass").value=PASS;login();}
+</script>
+<div id="emojiPanel" style="display:none;position:absolute;z-index:400;background:#fff;border:1.5px solid #e3d9d0;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.14);padding:10px;width:272px;max-height:210px;overflow-y:auto"></div>
+</body>
+</html>

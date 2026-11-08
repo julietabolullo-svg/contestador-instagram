@@ -1,0 +1,35 @@
+# Contestador de Instagram · configuración de Supabase CLI
+# Todas las funciones tienen verify_jwt = false: son webhooks o se protegen con su propio secreto
+# (ADMIN_PASSWORD o CRON_SECRET), no con JWT de Supabase.
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[functions.instagram-webhook]
+verify_jwt = false
+
+[functions.ig-admin]
+verify_jwt = false
+
+[functions.ig-oauth]
+verify_jwt = false
+
+[functions.ig-refresh]
+verify_jwt = false
+
+[functions.ig-click]
+verify_jwt = false
+
+[functions.ig-link-stats]
+verify_jwt = false
+
+[functions.privacy]
+verify_jwt = false
+
+[functions.data-deletion]
+verify_jwt = false
+

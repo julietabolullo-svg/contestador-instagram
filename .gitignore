@@ -1,0 +1,11 @@
+config.js
+.env
+.env.local
+.env.*.local
+.DS_Store
+node_modules/
+.supabase/
+supabase/.temp/
+*.log
+.env.subir
+.impeccable/
