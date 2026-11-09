@@ -267,7 +267,16 @@ async function fetchMediaTimestamp(acc: Account, mediaId: string): Promise<strin
 // ---------------------------------------------------------------------------
 // Entrega de enlaces y FAQs
 // ---------------------------------------------------------------------------
+// Si el envío falla, se borra la marca de entrega: así la persona puede volver a pedirlo
+// y no se queda como «entregada» sin haber recibido nada.
 async function entregar(acc: Account, igsid: string, rule: any, fallback: string) {
+  try { await entregarSinMarca(acc, igsid, rule, fallback); }
+  catch (e) {
+    if (rule?.id) await db.from("ig_entregas").delete().eq("rule_id", rule.id).eq("igsid", igsid);
+    throw e;
+  }
+}
+async function entregarSinMarca(acc: Account, igsid: string, rule: any, fallback: string) {
   if (rule?.image_url) { try { await dmAttachment(acc, igsid, "image", rule.image_url); } catch (e) { console.error("adjunto imagen", e); } }
   if (rule?.audio_url) { try { await dmAttachment(acc, igsid, "audio", rule.audio_url); } catch (e) { console.error("adjunto audio", e); } }
   const texto = (rule?.final_message && rule.final_message.trim()) || fallback;
@@ -472,7 +481,7 @@ async function handleComment(acc: Account, v: any) {
   // Tope por hora
   const since = new Date(Date.now() - 3600000).toISOString();
   const { count } = await db.from("ig_events").select("*", { count: "exact", head: true })
-    .eq("dm_status", "sent").eq("ig_user_id", acc.id).gte("created_at", since);
+    .in("dm_status", ["sent", "resent"]).eq("ig_user_id", acc.id).gte("created_at", since);
   if ((count ?? 0) >= MAX_PER_HOUR) {
     await db.from("ig_events").update({ dm_status: "throttled", matched_rule_id: rule.id }).eq("comment_id", commentId);
     return;
@@ -525,8 +534,9 @@ async function handlePostback(acc: Account, m: any) {
   if (!payload.startsWith("rule:")) return;
 
   const ruleId = payload.slice(5);
-  const { data: rule } = await db.from("ig_rules").select("*").eq("id", ruleId).maybeSingle();
-  if (!rule) return;
+  // Solo reglas activas y de esta cuenta: un botón de un privado antiguo no reactiva una regla apagada
+  const { data: rule } = await db.from("ig_rules").select("*").eq("id", ruleId).eq("is_active", true).maybeSingle();
+  if (!rule || String(rule.ig_user_id) !== String(acc.id)) return;
   await db.from("ig_clicks").insert({ rule_id: ruleId, igsid });
   await upsertContact(igsid, undefined, undefined, acc.id);
 

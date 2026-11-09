@@ -17,8 +17,27 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "";
 const ALERT_EMAIL = Deno.env.get("ALERT_EMAIL") ?? "";
 const SELF_URL = `${SUPABASE_URL}/functions/v1/ig-oauth`;
+const ADMIN_PASSWORD = Deno.env.get("ADMIN_PASSWORD") ?? "";
 
 const db = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+// Firma del «state» de la conexión con Instagram: solo quien conoce ADMIN_PASSWORD (el panel)
+// puede iniciar una conexión válida, y caduca a los 15 minutos.
+async function firmarState(exp: string): Promise<string> {
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(ADMIN_PASSWORD), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const s = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode("ig-oauth:" + exp));
+  return Array.from(new Uint8Array(s)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function stateValido(state: string | null): Promise<boolean> {
+  if (!state || !ADMIN_PASSWORD) return false;
+  const [exp, firma] = state.split(".");
+  if (!exp || !firma || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+  const buena = await firmarState(exp);
+  if (buena.length !== firma.length) return false;
+  let diff = 0;
+  for (let i = 0; i < buena.length; i++) diff |= buena.charCodeAt(i) ^ firma.charCodeAt(i);
+  return diff === 0;
+}
 
 function redirect(url: string) { return new Response(null, { status: 302, headers: { Location: url } }); }
 // Vuelve al panel con un mensaje; si no hay PANEL_URL, muestra el texto tal cual.
@@ -97,6 +116,12 @@ Deno.serve(async (req) => {
     return volver("connect_error=" + encodeURIComponent(err));
   }
 
+  // Solo se aceptan conexiones iniciadas desde el panel (state firmado y sin caducar)
+  if (!(await stateValido(url.searchParams.get("state")))) {
+    await logDebug({ paso: "state_invalido" });
+    return volver("connect_error=" + encodeURIComponent("La conexión no se inició desde tu panel o ha caducado. Vuelve a pulsar «Conectar Instagram»."));
+  }
+
   try {
     // 1) Token corto
     const form = new URLSearchParams();
@@ -149,9 +174,16 @@ Deno.serve(async (req) => {
     };
     const { error: upErr } = await db.from("ig_accounts").upsert(row, { onConflict: "ig_user_id" });
     if (upErr) { await logDebug({ paso: "upsert", err: String(upErr.message) }); await avisarFallo("guardar conexión", String(upErr.message)); throw new Error("db"); }
+    // Es para UNA cuenta: si se conecta otra, la anterior queda desactivada
+    await db.from("ig_accounts").update({ is_active: false }).neq("ig_user_id", igUserId);
 
-    // 5) Suscribir la app a comentarios y mensajes de esa cuenta
-    await fetch(`https://graph.instagram.com/${API_VERSION}/${igUserId}/subscribed_apps?subscribed_fields=comments,messages&access_token=${encodeURIComponent(token)}`, { method: "POST" });
+    // 5) Suscribir la app a comentarios, mensajes y botones de esa cuenta
+    const subRes = await fetch(`https://graph.instagram.com/${API_VERSION}/${igUserId}/subscribed_apps?subscribed_fields=comments,messages,messaging_postbacks&access_token=${encodeURIComponent(token)}`, { method: "POST" });
+    if (!subRes.ok) {
+      const subTxt = (await subRes.text()).slice(0, 300);
+      await logDebug({ paso: "suscripcion", status: subRes.status, body: subTxt });
+      await avisarFallo("suscribir la cuenta a los avisos de Meta", `status ${subRes.status}: ${subTxt}`);
+    }
 
     await logDebug({ paso: largo.ok ? "OK" : "OK_provisional_reparando", username: me.username, ig_user_id: igUserId });
 

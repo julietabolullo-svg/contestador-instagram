@@ -16,6 +16,14 @@ const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const ANTHROPIC_MODEL = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-sonnet-5-5";
 const db = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+// Firma del «state» de la conexión con Instagram: solo quien conoce ADMIN_PASSWORD (el panel)
+// puede iniciar una conexión válida, y caduca a los 15 minutos.
+async function firmarState(exp: string): Promise<string> {
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(ADMIN_PASSWORD), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const s = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode("ig-oauth:" + exp));
+  return Array.from(new Uint8Array(s)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // CORS: si PANEL_ORIGIN está definido, solo ese origen; si no, "*" (útil en pruebas locales).
 const cors = {
   "Access-Control-Allow-Origin": PANEL_ORIGIN || "*",
@@ -237,6 +245,11 @@ Deno.serve(async (req) => {
   try {
     const igId = await cuentaId();
     const sinCuenta = () => json({ error: "Conecta primero tu Instagram (botón «Conectar Instagram»)" }, 400);
+
+    if (action === "oauth_state") {
+      const exp = String(Date.now() + 15 * 60 * 1000);
+      return json({ state: `${exp}.${await firmarState(exp)}` });
+    }
 
     if (action === "whoami") {
       const { data: accs } = igId

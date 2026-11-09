@@ -43,6 +43,7 @@ Mira primero los logs: Supabase → Edge Functions → `instagram-webhook` → L
 | No aparece nada en el log al comentar | El webhook no está suscrito o la app está en modo desarrollo | En Meta: Webhooks → suscribir `comments`, `messages`, `messaging_postbacks`; pasar la app a **Live** |
 | Contesta en público pero no llega el privado | La persona tiene cerrados los mensajes de quien no sigue (error 2534025) | Es normal: el contestador le pide que siga la cuenta. Activar «Pedir que me siga» |
 | Funcionaba y a los ~2 meses dejó de hacerlo | El token caducó: el cron de `ig-refresh` no está | Reconectar desde el panel y crear el cron (final de la migración) |
+| Al conectar Instagram dice «no se inició desde tu panel o ha caducado» | Se abrió el enlace de conexión fuera del panel, pasaron más de 15 min o falta `ADMIN_PASSWORD` en los secretos | Volver a pulsar «Conectar Instagram» desde el panel; si sigue, subir los secretos otra vez |
 | El panel dice 401 | Contraseña distinta de `ADMIN_PASSWORD` | Revisar el secreto |
 | El panel no carga datos | Falta `panel/config.js` o `PANEL_ORIGIN` no coincide con donde está el panel | Revisar los dos |
 

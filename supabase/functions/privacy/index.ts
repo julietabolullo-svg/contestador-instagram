@@ -7,6 +7,17 @@ const CONTACTO = Deno.env.get("LEGAL_CONTACT_EMAIL") || "[EMAIL DE CONTACTO]";
 const APP = Deno.env.get("LEGAL_APP_NAME") || "Contestador de Instagram";
 const FECHA = Deno.env.get("LEGAL_UPDATED_AT") || "[FECHA DE ÚLTIMA ACTUALIZACIÓN]";
 
+// Proveedores que reciben el email, según lo que el titular haya activado
+const USA_RESEND = !!Deno.env.get("RESEND_API_KEY");
+const USA_WEBHOOK = !!Deno.env.get("EMAIL_WEBHOOK_URL");
+const PROVEEDORES = [
+  "  • Supabase: la base de datos donde se guarda todo lo anterior.",
+  "  • Meta (Instagram): por donde llegan los comentarios y salen los mensajes.",
+  USA_RESEND ? "  • Resend: envía el correo de bienvenida a quien deja su email." : "",
+  USA_WEBHOOK ? "  • La herramienta de newsletter del responsable, a la que se envía el email que dejas para mandarte novedades." : "",
+  "  • MailerLite, solo si el responsable conecta su cuenta desde el panel: recibe el email que dejas para mandarte novedades.",
+].filter(Boolean).join("\n");
+
 const TEXT = `POLÍTICA DE PRIVACIDAD — ${APP}
 Última actualización: ${FECHA}
 
@@ -31,7 +42,9 @@ Con esos datos, la App envía automáticamente una respuesta por mensaje directo
 El tratamiento se basa en el interés legítimo del titular de la cuenta de Instagram de responder a las personas que interactúan con su contenido, conforme al Reglamento (UE) 2016/679 (RGPD).
 
 5. CONSERVACIÓN Y TERCEROS
-Los datos se almacenan en la infraestructura del proveedor de base de datos elegido por el responsable durante el tiempo necesario para prestar el servicio. No se venden ni se ceden a terceros con fines comerciales. Los datos se procesan a través de la API oficial de Meta/Instagram, sujeta a sus propias políticas.
+Los datos se guardan durante el tiempo necesario para prestar el servicio. No se venden ni se ceden a terceros con fines comerciales. Los tratan, por cuenta del responsable, estos proveedores:
+${PROVEEDORES}
+Puedes darte de baja de los correos en cualquier momento desde el enlace que incluye cada uno, o escribiendo a ${CONTACTO}.
 
 6. TUS DERECHOS
 Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición y limitación escribiendo a ${CONTACTO}.

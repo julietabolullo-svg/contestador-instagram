@@ -678,8 +678,9 @@ function salirPanel(){
   location.reload();
 }
 
-// URL de autorización de Instagram: el callback es la función ig-oauth
-function urlConectarInstagram(){
+// URL de autorización de Instagram: el callback es la función ig-oauth.
+// El «state» lo firma ig-admin con tu contraseña, para que nadie más pueda conectar una cuenta.
+function urlConectarInstagram(state){
   const u=new URL("https://www.instagram.com/oauth/authorize");
   u.searchParams.set("client_id",CFG.IG_APP_ID||"");
   u.searchParams.set("redirect_uri",(CFG.FUNCTIONS_URL||"")+"/ig-oauth");
@@ -687,14 +688,20 @@ function urlConectarInstagram(){
   u.searchParams.set("scope","instagram_business_basic,instagram_business_manage_comments,instagram_business_manage_messages");
   u.searchParams.set("enable_fb_login","0");
   u.searchParams.set("force_authentication","1");
+  u.searchParams.set("state",state);
   return u.toString();
+}
+async function conectarInstagram(ev){
+  ev.preventDefault();
+  try{ const r=await api("oauth_state"); location.href=urlConectarInstagram(r.state); }
+  catch(e){ alert("No he podido iniciar la conexión: "+(e.message||e)); }
 }
 
 async function entrarPanel(){
   document.getElementById("login").classList.add("hide");
   document.getElementById("app").classList.remove("hide");
   const a=document.getElementById("igConnect");
-  if(a) a.href=urlConectarInstagram();
+  if(a) a.onclick=conectarInstagram;
   const g=await api("mailerlite_groups").catch(()=>({groups:[],note:"no_key"})); ML_GROUPS=g.groups||[]; ML_CONNECTED=g.note!=="no_key";
   loadMetrics(); loadAccounts().then(()=>loadRules());
 }
